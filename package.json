@@ -1,0 +1,20 @@
+{
+  "name": "windmil-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Windmill Invest website (demo): static pages generated from one content source, plus a small lead server.",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "check": "node lib/check-content.js",
+    "build": "node --env-file-if-exists=.env build.js",
+    "start": "node --env-file-if-exists=.env build.js && node --env-file-if-exists=.env server.js",
+    "test": "node --env-file-if-exists=.env build.js && node --env-file-if-exists=.env test/smoke.js"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.9",
+    "pg": "8.23.1"
+  }
+}
