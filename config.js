@@ -43,6 +43,8 @@ export const config = {
   // PostgreSQL server, e.g. Cloud SQL on GCP. Without it, the built-in PostgreSQL (PGlite) keeps its data in dataDir.
   databaseUrl: env.DATABASE_URL || '',
   dataDir: env.DATA_DIR || 'data/pglite',
+  // STORAGE=memory: no database at all, inquiries kept in memory until a restart (demos on small hosts only).
+  storage: env.STORAGE || '',
 
   // Windmill CRM's Lead API (docs/lead-contract.md). Leads wait in the outbox until the URL is set.
   crmLeadUrl: env.CRM_LEAD_API_URL || '',

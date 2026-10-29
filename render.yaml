@@ -1,8 +1,8 @@
 # Render Blueprint: a demo copy of the site to show around (Render → New → Blueprint → this repository).
 # Free plan: the site sleeps after 15 minutes without visitors (the first visit then takes about a minute).
-# Needs DATABASE_URL (Environment tab): an external PostgreSQL, e.g. a free Neon database (neon.tech). The
-# built-in PostgreSQL does not fit: it needs about 1 GB of memory to start, the free plan has 512 MB.
-# Production runs on Google Cloud (see README).
+# STORAGE=memory: no database. Forms work and inquiries show in /admin, but they are gone after every restart,
+# redeploy and wake-up (the built-in PostgreSQL needs about 1 GB to start; the free plan has 512 MB). To keep
+# inquiries, remove STORAGE and set DATABASE_URL to a PostgreSQL database. Production runs on Google Cloud.
 services:
   - type: web
     name: windmill-invest-demo
@@ -19,7 +19,7 @@ services:
         value: "true"
       - key: TRUST_PROXY
         value: "true"
+      - key: STORAGE
+        value: memory
       - key: ADMIN_PASSWORD
         generateValue: true
-      - key: DATABASE_URL
-        sync: false

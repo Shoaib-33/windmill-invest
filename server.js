@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { timingSafeEqual } from 'node:crypto';
 import { config } from './config.js';
 import { DRAFT_DAYS, openDb } from './lib/db.js';
+import { MEMORY_STORAGE, openMemoryDb } from './lib/memory-db.js';
 import { startForwarder } from './lib/forwarder.js';
 import { ATTRIBUTION, FORMS, validateDraft, validateInquiry } from './lib/forms.js';
 import { SLUGS } from './lib/pages.js';
@@ -213,8 +214,8 @@ async function streamCsv(res, db) {
   res.end('\r\n');
 }
 
-export async function createApp({ dbPath = config.databaseUrl || config.dataDir, maxSubmissions = 8, crm = {}, addressLookup = createAddressLookup() } = {}) {
-  const db = await openDb(dbPath);
+export async function createApp({ dbPath = config.databaseUrl || (config.storage === 'memory' ? MEMORY_STORAGE : config.dataDir), maxSubmissions = 8, crm = {}, addressLookup = createAddressLookup() } = {}) {
+  const db = dbPath === MEMORY_STORAGE ? openMemoryDb() : await openDb(dbPath);
   const rateLimited = rateLimiter(maxSubmissions);
   const lookupLimited = rateLimiter(60);
   const draftLimited = rateLimiter(60);
@@ -345,7 +346,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     console.log(`${config.brand} running at http://localhost:${config.port}`);
     console.log(server.storage === 'postgres'
       ? 'Inquiries: stored in the PostgreSQL server (DATABASE_URL).'
-      : `Inquiries: stored in the built-in PostgreSQL (PGlite) in ${config.dataDir}. On GCP, set DATABASE_URL to Cloud SQL.`);
+      : server.storage === 'memory'
+        ? 'Inquiries: kept in memory only (STORAGE=memory) and lost on restart. Demo use only.'
+        : `Inquiries: stored in the built-in PostgreSQL (PGlite) in ${config.dataDir}. On GCP, set DATABASE_URL to Cloud SQL.`);
     console.log(server.forwarder.enabled
       ? `Windmill CRM: leads are forwarded to ${config.crmLeadUrl}.`
       : 'Windmill CRM: CRM_LEAD_API_URL not set; leads wait in the outbox and are sent once it is.');

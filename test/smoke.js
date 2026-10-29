@@ -34,7 +34,7 @@ const BAG = {
   '1012JS-5': ['B', 'C'].map((l, i) => ({ id: `036301001211009${3 + i}`, label: `Dam 5${l}, 1012JS Amsterdam`, street: 'Dam', house_number: '5', house_letter: l, house_addition: '', postcode: '1012JS', city: 'Amsterdam', bag_vbo_id: `036301001211009${3 + i}`, bag_nummeraanduiding_id: `036320001211180${7 + i}` })),
 };
 const addressLookup = async (pc, nr) => BAG[`${String(pc).replace(/\s/g, '').toUpperCase()}-${String(nr).match(/^\d+/)?.[0]}`] || [];
-const server = await createApp({ dbPath: process.env.TEST_DATABASE_URL || 'memory://', maxSubmissions: 80, crm, addressLookup });
+const server = await createApp({ dbPath: process.env.TEST_DATABASE_URL || process.env.TEST_STORAGE || 'memory://', maxSubmissions: 80, crm, addressLookup });
 const waitFor = async (check, ms = 4000) => {
   const end = Date.now() + ms;
   for (;;) {

@@ -27,6 +27,8 @@ Inquiries are always stored in **PostgreSQL**, with one schema and the same quer
 - **Production (GCP):** Cloud SQL for PostgreSQL, through `DATABASE_URL`. See "Deploy to Google Cloud" below.
 - Optionally a local PostgreSQL server: `psql -U postgres -h localhost -v pw="choose-a-password" -f db/setup.sql`, then set `DATABASE_URL` in `.env` (see `.env.example`).
 
+For a quick demo on a small host (Render's free plan, see `render.yaml`), `STORAGE=memory` runs without any database: inquiries are kept in memory and lost on restart. Never use it for real leads.
+
 The table is created on first start. Form answers are stored as `jsonb` in the `data` column, so new form fields need no database change. The server prints which storage it uses when it starts. Set `TEST_DATABASE_URL` to run the tests against a PostgreSQL server.
 
 ## Deploy to Google Cloud (Cloud Run + Cloud SQL)
