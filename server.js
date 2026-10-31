@@ -9,16 +9,17 @@ import { config } from './config.js';
 import { DRAFT_DAYS, openDb } from './lib/db.js';
 import { MEMORY_STORAGE, openMemoryDb } from './lib/memory-db.js';
 import { startForwarder } from './lib/forwarder.js';
-import { ATTRIBUTION, FORMS, validateDraft, validateInquiry } from './lib/forms.js';
+import { ATTRIBUTION, FORMS, formFor, validateDraft, validateInquiry } from './lib/forms.js';
 import { SLUGS } from './lib/pages.js';
 import { esc } from './lib/render.js';
-import { createAddressLookup } from './lib/bag.js';
+import { createAddressLookup, createHouseDetails, createModel3d, createTileFetcher } from './lib/bag.js';
 import { FUNNEL_SLUGS } from './lib/funnels.js';
 
 // Adds the BAG address to an inquiry with a postcode and house number: the visitor's choice (address_id)
 // when it is one of the matches, else the only match. Looked up again on the server, never trusted from the
-// browser; when nothing matches, the address stays as typed.
-async function withBagAddress(record, addressId, lookup) {
+// browser; when nothing matches, the address stays as typed. With the address come the build year, floor
+// area and use from the BAG, so the valuation starts with facts.
+async function withBagAddress(record, addressId, lookup, details) {
   const d = record.data;
   if (!d.postcode || !d.house_number) return record;
   const matches = await lookup(d.postcode, d.house_number);
@@ -29,6 +30,10 @@ async function withBagAddress(record, addressId, lookup) {
       city: d.city || pick.city, bag_vbo_id: pick.bag_vbo_id, bag_nummeraanduiding_id: pick.bag_nummeraanduiding_id,
     });
     for (const k of ['house_letter', 'house_addition']) if (d[k] === undefined) delete d[k];
+    const facts = details ? await details(pick.bag_vbo_id) : null;
+    if (facts?.build_year) d.bag_build_year = facts.build_year;
+    if (facts?.area_m2) d.bag_area_m2 = facts.area_m2;
+    if (facts?.use) d.bag_use = facts.use;
   }
   return record;
 }
@@ -158,41 +163,99 @@ const csvCell = (v) => {
 
 const ADMIN_PAGE_SIZE = 200;
 
-const AVATAR_LABELS = { distressed_urgent: 'Urgent / zorgvuldig', klushuis_low_label: 'Klushuis / laag label', fatigued_investor: 'Verhuurder / belegger' };
-const CRM_LABELS = { sent: 'In CRM', pending: 'Wacht op CRM', failed: 'Mislukt' };
+// The admin page in Dutch or English (/admin?lang=en). Answers are shown with the form's own question and
+// option texts in that language; the stored values themselves never change.
+const ADMIN_TEXT = {
+  nl: {
+    title: 'Aanvragen', csv: 'Download alles als CSV', newest: 'Nieuwste', older: 'Oudere aanvragen →', none: 'Nog geen aanvragen.',
+    cols: ['#', 'Datum', 'Formulier', 'Contact', 'Gegevens', 'Pagina / bron', 'Contact toegestaan', 'CRM'],
+    lang: { nl: 'Nederlands', en: 'English' }, unknownType: 'type onbekend', direct: 'direct', photo: 'Foto',
+    avatar: { distressed_urgent: 'Urgent / zorgvuldig', klushuis_low_label: 'Klushuis / laag label', fatigued_investor: 'Verhuurder / belegger' },
+    crm: { sent: 'In CRM', pending: 'Wacht op CRM', failed: 'Mislukt' },
+    consents: { phone: 'bellen', whatsapp: 'WhatsApp', marketing: 'nieuwsbrief', none: 'alleen over aanvraag' },
+    backlog: (p, f) => `${p} wachten op verzending, ${f} mislukt.`,
+    noCrm: ' De koppeling met Windmill CRM is nog niet ingesteld (CRM_LEAD_API_URL); aanvragen blijven hier bewaard tot die er is.',
+    unfinished: (days) => `Onafgemaakte formulieren (laatste ${days} dagen)`,
+    unfinishedIntro: 'Bezoekers die na een stap zijn gestopt, met toestemming bewaard. Er zijn geen contactgegevens: gebruik dit om te zien waar mensen afhaken.',
+    stoppedAfter: (n) => `gestopt na stap ${n}`, step: 'stap', unfinishedCols: ['Laatst', 'Formulier', 'Antwoorden', 'Pagina / bron'],
+    extra: { street: 'Straat', city: 'Plaats', house_letter: 'Huisletter', house_addition: 'Toevoeging', bag_vbo_id: 'BAG-verblijfsobject', bag_nummeraanduiding_id: 'BAG-nummeraanduiding', bag_build_year: 'Bouwjaar (BAG)', bag_area_m2: 'Oppervlakte in m² (BAG)', bag_use: 'Gebruiksdoel (BAG)' },
+    yes: 'Ja',
+  },
+  en: {
+    title: 'Inquiries', csv: 'Download all as CSV', newest: 'Newest', older: 'Older inquiries →', none: 'No inquiries yet.',
+    cols: ['#', 'Date', 'Form', 'Contact', 'Answers', 'Page / source', 'Contact allowed', 'CRM'],
+    lang: { nl: 'Dutch', en: 'English' }, unknownType: 'type unknown', direct: 'direct', photo: 'Photo',
+    avatar: { distressed_urgent: 'Urgent / careful', klushuis_low_label: 'Fixer-upper / low label', fatigued_investor: 'Landlord / investor' },
+    crm: { sent: 'In CRM', pending: 'Waiting for CRM', failed: 'Failed' },
+    consents: { phone: 'call', whatsapp: 'WhatsApp', marketing: 'newsletter', none: 'only about the inquiry' },
+    backlog: (p, f) => `${p} waiting to be sent, ${f} failed.`,
+    noCrm: ' The link to Windmill CRM is not set up yet (CRM_LEAD_API_URL); inquiries are kept here until it is.',
+    unfinished: (days) => `Unfinished forms (last ${days} days)`,
+    unfinishedIntro: 'Visitors who stopped after a step, kept with their consent. There are no contact details: use this to see where people drop out.',
+    stoppedAfter: (n) => `stopped after step ${n}`, step: 'step', unfinishedCols: ['Last', 'Form', 'Answers', 'Page / source'],
+    extra: { street: 'Street', city: 'Town', house_letter: 'House letter', house_addition: 'Addition', bag_vbo_id: 'BAG residential object', bag_nummeraanduiding_id: 'BAG address id', bag_build_year: 'Build year (BAG)', bag_area_m2: 'Floor area in m² (BAG)', bag_use: 'Use (BAG)' },
+    yes: 'Yes',
+  },
+};
 
-// Unfinished landing-page forms: where visitors stopped, and the newest ones (no contact details exist).
-function unfinishedSection({ perStep, recent }) {
-  if (!recent.length) return '';
-  const stepName = (s) => FORMS[s.form_type]?.steps?.[s.step - 1];
-  const counts = perStep.map((s) => `${esc(s.form_type)}, gestopt na stap ${s.step}${stepName(s) ? ` (${esc(stepName(s))})` : ''}: ${s.n}`).join('<br>');
-  const tr = recent.map((d) => `<tr><td>${esc(d.updated_at.slice(0, 16).replace('T', ' '))}</td><td>${esc(d.form_type)} · stap ${d.step} · ${d.lang === 'en' ? 'English' : 'Nederlands'}</td>
-<td>${Object.entries(d.data).map(([k, v]) => `<b>${esc(k)}</b>: ${esc(v)}`).join('<br>')}</td><td>${esc(d.page || '')}<br><small>${esc([d.attribution.utm_source, d.attribution.utm_campaign].filter(Boolean).join(' / ') || 'direct')}</small></td></tr>`).join('');
-  return `<details><summary><b>Onafgemaakte formulieren (laatste ${DRAFT_DAYS} dagen)</b></summary><p>Bezoekers die na een stap zijn gestopt, met toestemming bewaard. Er zijn geen contactgegevens: gebruik dit om te zien waar mensen afhaken.</p><p>${counts}</p>
-<div class="wrap"><table><thead><tr><th>Laatst</th><th>Formulier</th><th>Antwoorden</th><th>Pagina / bron</th></tr></thead><tbody>${tr}</tbody></table></div></details>`;
+// One inquiry's answers as "question: answer" lines, in the form's order, in the admin's language.
+function answers(formType, data, lang) {
+  const t = ADMIN_TEXT[lang];
+  const fields = new Map((formFor(formType, lang)?.fields || []).map((fd) => [fd.name, fd]));
+  const short = (label) => label.replace(/\s*\((optioneel|optional)[^)]*\)\s*$/i, '');
+  const line = ([k, v]) => {
+    const fd = fields.get(k);
+    const label = fd ? short(fd.label) : t.extra[k] || k;
+    const value = fd?.type === 'checkbox' && v === true ? t.yes : fd?.options?.find(([o]) => o === v)?.[1] ?? v;
+    return `<b>${esc(label)}</b>: ${esc(value)}`;
+  };
+  const order = [...fields.keys()];
+  const rank = (k) => (order.includes(k) ? order.indexOf(k) : order.length);
+  return Object.entries(data).sort(([a], [b]) => rank(a) - rank(b)).map(line).join('<br>');
 }
 
-function adminPage(rows, total, beforeId, outbox, unfinished) {
+// Unfinished landing-page forms: where visitors stopped, and the newest ones (no contact details exist).
+function unfinishedSection({ perStep, recent }, lang) {
+  if (!recent.length) return '';
+  const t = ADMIN_TEXT[lang];
+  const title = (type) => formFor(type, lang)?.title || type;
+  const stepName = (s) => formFor(s.form_type, lang)?.steps?.[s.step - 1];
+  const counts = perStep.map((s) => `${esc(title(s.form_type))}, ${t.stoppedAfter(s.step)}${stepName(s) ? ` (${esc(stepName(s))})` : ''}: ${s.n}`).join('<br>');
+  const tr = recent.map((d) => `<tr><td>${esc(d.updated_at.slice(0, 16).replace('T', ' '))}</td><td>${esc(title(d.form_type))}<br><small>${t.step} ${d.step} · ${t.lang[d.lang === 'en' ? 'en' : 'nl']}</small></td>
+<td>${answers(d.form_type, d.data, lang)}</td><td>${esc(d.page || '')}<br><small>${esc([d.attribution.utm_source, d.attribution.utm_campaign].filter(Boolean).join(' / ') || t.direct)}</small></td></tr>`).join('');
+  return `<details><summary><b>${t.unfinished(DRAFT_DAYS)}</b></summary><p>${t.unfinishedIntro}</p><p>${counts}</p>
+<div class="wrap"><table><thead><tr>${t.unfinishedCols.map((c) => `<th>${c}</th>`).join('')}</tr></thead><tbody>${tr}</tbody></table></div></details>`;
+}
+
+function adminPage(rows, total, beforeId, outbox, unfinished, lang = 'nl') {
+  const t = ADMIN_TEXT[lang];
+  const href = (l, params = '') => {
+    const p = [params, l === 'en' && 'lang=en'].filter(Boolean);
+    return `/admin${p.length ? '?' + p.join('&') : ''}`;
+  };
   const tr = rows.map((r) => {
-    const photos = r.photo_ids.length ? `<br>${r.photo_ids.map((id) => `<a href="/admin/photos/${id}" target="_blank" rel="noopener"><img src="/admin/photos/${id}" alt="Foto" width="72" height="54" loading="lazy" style="object-fit:cover;margin:4px 4px 0 0"></a>`).join('')}` : '';
-    const data = Object.entries(r.data).map(([k, v]) => `<b>${esc(k)}</b>: ${esc(v)}`).join('<br>') + photos;
-    const source = [r.utm_source, r.utm_medium, r.utm_campaign].filter(Boolean).join(' / ') || (r.referrer ? esc(r.referrer) : 'direct');
-    const allowed = [r.consent_phone && 'bellen', r.consent_whatsapp && 'WhatsApp', r.consent_marketing && 'nieuwsbrief'].filter(Boolean).join(', ') || 'alleen over aanvraag';
-    return `<tr><td>${r.id}</td><td>${esc(r.created_at.slice(0, 16).replace('T', ' '))}</td><td>${esc(FORMS[r.form_type]?.title || r.form_type)}<br><small>${r.lang === 'en' ? 'English' : 'Nederlands'} · ${esc(AVATAR_LABELS[r.avatar] || 'type onbekend')}</small></td>
+    const photos = r.photo_ids.length ? `<br>${r.photo_ids.map((id) => `<a href="/admin/photos/${id}" target="_blank" rel="noopener"><img src="/admin/photos/${id}" alt="${t.photo}" width="72" height="54" loading="lazy" style="object-fit:cover;margin:4px 4px 0 0"></a>`).join('')}` : '';
+    const data = answers(r.form_type, r.data, lang) + photos;
+    const source = [r.utm_source, r.utm_medium, r.utm_campaign].filter(Boolean).join(' / ') || r.referrer || t.direct;
+    const allowed = [r.consent_phone && t.consents.phone, r.consent_whatsapp && t.consents.whatsapp, r.consent_marketing && t.consents.marketing].filter(Boolean).join(', ') || t.consents.none;
+    return `<tr><td>${r.id}</td><td>${esc(r.created_at.slice(0, 16).replace('T', ' '))}</td><td>${esc(formFor(r.form_type, lang)?.title || r.form_type)}<br><small>${t.lang[r.lang === 'en' ? 'en' : 'nl']} · ${esc(t.avatar[r.avatar] || t.unknownType)}</small></td>
 <td>${esc(r.name)}<br><a href="mailto:${esc(r.email)}">${esc(r.email)}</a><br>${r.phone ? `<a href="tel:${esc(r.phone)}">${esc(r.phone)}</a>` : ''}</td>
-<td>${data}</td><td>${esc(r.page || '')}<br><small>${esc(source)}</small></td><td>${esc(allowed)}</td><td>${esc(CRM_LABELS[r.crm_status] || '–')}</td></tr>`;
+<td>${data}</td><td>${esc(r.page || '')}<br><small>${esc(source)}</small></td><td>${esc(allowed)}</td><td>${esc(t.crm[r.crm_status] || '–')}</td></tr>`;
   }).join('');
   const backlog = (outbox.pending || 0) + (outbox.failed || 0);
-  return `<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
-<title>Aanvragen – ${esc(config.brand)}</title>
+  const before = beforeId ? `before=${beforeId}` : '';
+  const switcher = `<span class="lang">${['nl', 'en'].map((l) => l === lang ? `<b>${l.toUpperCase()}</b>` : `<a href="${href(l, before)}">${l.toUpperCase()}</a>`).join(' | ')}</span>`;
+  return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>${t.title} – ${esc(config.brand)}</title>
 <style>body{font:15px/1.5 system-ui,sans-serif;margin:0;padding:24px 16px;background:#f5f6f2;color:#16231f}h1{margin:0 0 12px}table{border-collapse:collapse;width:100%;background:#fff}
-th,td{border:1px solid #d4dcd6;padding:8px;text-align:left;vertical-align:top}th{background:#edf1ec}.wrap{overflow-x:auto}a{color:#0f5c53}</style></head>
-<body><h1>Aanvragen (${total.toLocaleString('nl-NL')})</h1><p><a href="/admin/inquiries.csv">Download alles als CSV</a>${beforeId ? ' · <a href="/admin">Nieuwste</a>' : ''}</p>
-${unfinishedSection(unfinished)}
-${backlog ? `<p><b>CRM:</b> ${outbox.pending || 0} wachten op verzending, ${outbox.failed || 0} mislukt.${config.crmLeadUrl ? '' : ' De koppeling met Windmill CRM is nog niet ingesteld (CRM_LEAD_API_URL); aanvragen blijven hier bewaard tot die er is.'}</p>` : ''}
-<div class="wrap"><table><thead><tr><th>#</th><th>Datum</th><th>Formulier</th><th>Contact</th><th>Gegevens</th><th>Pagina / bron</th><th>Contact toegestaan</th><th>CRM</th></tr></thead>
-<tbody>${tr || '<tr><td colspan="8">Nog geen aanvragen.</td></tr>'}</tbody></table></div>
-${rows.length === ADMIN_PAGE_SIZE ? `<p><a href="/admin?before=${rows.at(-1).id}">Oudere aanvragen →</a></p>` : ''}</body></html>`;
+th,td{border:1px solid #d4dcd6;padding:8px;text-align:left;vertical-align:top}th{background:#edf1ec}.wrap{overflow-x:auto}a{color:#0f5c53}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:16px}.lang{font-size:14px}</style></head>
+<body><div class="top"><h1>${t.title} (${total.toLocaleString(lang === 'en' ? 'en-GB' : 'nl-NL')})</h1>${switcher}</div><p><a href="/admin/inquiries.csv">${t.csv}</a>${beforeId ? ` · <a href="${href(lang)}">${t.newest}</a>` : ''}</p>
+${unfinishedSection(unfinished, lang)}
+${backlog ? `<p><b>CRM:</b> ${t.backlog(outbox.pending || 0, outbox.failed || 0)}${config.crmLeadUrl ? '' : t.noCrm}</p>` : ''}
+<div class="wrap"><table><thead><tr>${t.cols.map((c) => `<th>${c}</th>`).join('')}</tr></thead>
+<tbody>${tr || `<tr><td colspan="8">${t.none}</td></tr>`}</tbody></table></div>
+${rows.length === ADMIN_PAGE_SIZE ? `<p><a href="${href(lang, `before=${rows.at(-1).id}`)}">${t.older}</a></p>` : ''}</body></html>`;
 }
 
 // Streams every inquiry as CSV in batches, waiting when the connection is slow, so memory stays flat
@@ -214,11 +277,12 @@ async function streamCsv(res, db) {
   res.end('\r\n');
 }
 
-export async function createApp({ dbPath = config.databaseUrl || (config.storage === 'memory' ? MEMORY_STORAGE : config.dataDir), maxSubmissions = 8, crm = {}, addressLookup = createAddressLookup() } = {}) {
+export async function createApp({ dbPath = config.databaseUrl || (config.storage === 'memory' ? MEMORY_STORAGE : config.dataDir), maxSubmissions = 8, crm = {}, addressLookup = createAddressLookup(), houseDetails = createHouseDetails(), tileFetch = createTileFetcher(), model3d = createModel3d() } = {}) {
   const db = dbPath === MEMORY_STORAGE ? openMemoryDb() : await openDb(dbPath);
   const rateLimited = rateLimiter(maxSubmissions);
   const lookupLimited = rateLimiter(60);
   const draftLimited = rateLimiter(60);
+  const tileLimited = rateLimiter(600);
   // Unfinished forms are kept for DRAFT_DAYS days only.
   const pruneDrafts = () => db.drafts.prune().catch((err) => console.error(`Could not remove old drafts: ${err.message}`));
   pruneDrafts();
@@ -244,7 +308,8 @@ export async function createApp({ dbPath = config.databaseUrl || (config.storage
       if (req.method === 'GET' && (path === '/admin' || path === '/admin/')) {
         const beforeId = Number(url.searchParams.get('before')) || null;
         const [rows, total, outbox, unfinished] = await Promise.all([db.list({ limit: ADMIN_PAGE_SIZE, beforeId }), db.count(), db.outbox.stats(), db.drafts.unfinished()]);
-        return send(res, 200, adminPage(rows, total, beforeId, outbox, unfinished), 'text/html; charset=utf-8', noStore);
+        const lang = url.searchParams.get('lang') === 'en' ? 'en' : 'nl';
+        return send(res, 200, adminPage(rows, total, beforeId, outbox, unfinished, lang), 'text/html; charset=utf-8', noStore);
       }
       if (req.method === 'GET' && path === '/admin/inquiries.csv') return streamCsv(res, db);
       const adminPhoto = path.match(/^\/admin\/photos\/(\d{1,15})$/);
@@ -257,7 +322,35 @@ export async function createApp({ dbPath = config.databaseUrl || (config.storage
       if (req.method !== 'GET') return sendJson(res, 405, { ok: false });
       if (lookupLimited(clientIp(req))) return sendJson(res, 429, { ok: false });
       const matches = await addressLookup(url.searchParams.get('postcode'), url.searchParams.get('number'));
-      return sendJson(res, 200, { ok: true, matches: matches.map(({ id, label, street, house_number, house_letter, house_addition, city }) => ({ id, label, street, house_number, house_letter, house_addition, city })) });
+      return sendJson(res, 200, { ok: true, matches: matches.map(({ id, label, street, house_number, house_letter, house_addition, city, lat, lon }) => ({ id, label, street, house_number, house_letter, house_addition, city, lat, lon })) });
+    }
+
+    // Facts about one home (build year, floor area, use) for the "we found your home" card.
+    if (path === '/api/house') {
+      if (req.method !== 'GET') return sendJson(res, 405, { ok: false });
+      if (lookupLimited(clientIp(req))) return sendJson(res, 429, { ok: false });
+      const details = await houseDetails(url.searchParams.get('id'));
+      return sendJson(res, 200, { ok: true, details: details && { build_year: details.build_year, area_m2: details.area_m2, use: details.use } });
+    }
+
+    // The building in 3D for the same card (null when there is no model; the card then keeps the aerial photo).
+    if (path === '/api/model') {
+      if (req.method !== 'GET') return sendJson(res, 405, { ok: false });
+      if (lookupLimited(clientIp(req))) return sendJson(res, 429, { ok: false });
+      const details = await houseDetails(url.searchParams.get('id'));
+      const model = details?.pand_id ? await model3d(details.pand_id) : null;
+      return sendJson(res, 200, { ok: true, model });
+    }
+
+    // Aerial photo tiles for that card, fetched here so the browser only talks to this site.
+    const tileMatch = path.match(/^\/api\/tile\/(\d{2})\/(\d{1,7})\/(\d{1,7})\.jpg$/);
+    if (tileMatch) {
+      if (req.method !== 'GET') return sendJson(res, 405, { ok: false });
+      if (tileLimited(clientIp(req))) return send(res, 429, '', 'text/plain');
+      const bytes = await tileFetch(Number(tileMatch[1]), Number(tileMatch[2]), Number(tileMatch[3]));
+      if (!bytes) return send(res, 404, '', 'text/plain');
+      res.writeHead(200, { 'content-type': 'image/jpeg', 'content-length': bytes.length, 'cache-control': 'public, max-age=604800', ...SECURITY_HEADERS });
+      return res.end(bytes);
     }
 
     // Photos for Windmill CRM: the lead.created event links here; the CRM fetches with its API token.
@@ -303,7 +396,7 @@ export async function createApp({ dbPath = config.databaseUrl || (config.storage
 
       const { ok, errors, record } = validateInquiry(input, slugs);
       if (!ok) return sendJson(res, 422, { ok: false, errors });
-      await withBagAddress(record, String(input.address_id || '').replace(/\D/g, '').slice(0, 16), addressLookup);
+      await withBagAddress(record, String(input.address_id || '').replace(/\D/g, '').slice(0, 16), addressLookup, houseDetails);
       const saved = await db.add(record, config.consentVersion, { ip });
       if (!saved.duplicate) forwarder.nudge();
       // event_id lets the browser's generate_lead event and server-side conversions deduplicate.

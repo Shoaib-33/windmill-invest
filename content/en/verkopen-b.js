@@ -11,7 +11,7 @@ export default [
     keyword: `sell property portfolio Netherlands`,
     secondary: [`sell multiple properties Netherlands`, `sell rental property portfolio`, `sell units individually or in one transaction`, `sell rental homes box 3`],
     form: 'commercieel',
-    related: ['/beleggingspand-verkopen/', '/verhuurde-woning-verkopen/', '/bedrijfspand-verkopen/', '/vastgoedportefeuillebeheer/', '/commercieel-vastgoed/'],
+    related: ['/beleggingspand-verkopen/', '/verhuurde-woning-verkopen/', '/bedrijfspand-verkopen/'],
     eyebrow: `Selling · Portfolios`,
     intro: `You can sell a property portfolio in one transaction to a single buyer, or by selling the properties one by one. Windmill Invest buys residential and commercial portfolios in its own name if they fit our acquisition criteria, including when only part of the portfolio is involved. You receive a no-obligation, well-reasoned proposal, or an honest answer if your portfolio is not a fit for us.`,
     heroPoints: [`Discreet handling of your information`, `Selling part of the portfolio is also open for discussion`, `No estate agent's commission on a direct sale`],
@@ -21,7 +21,7 @@ export default [
         blocks: [
           { p: `Selling a property portfolio calls for different choices from selling a single home. Do you sell everything at once or property by property? What happens to the tenants? And how do you keep the sale discreet, so that tenants, staff and the market are not unsettled unnecessarily?` },
           { p: `As a direct buyer, Windmill Invest buys houses, apartment complexes, commercial buildings and mixed portfolios. We assess the portfolio as a whole and each property individually. If part of it fits our acquisition criteria and part does not, we will tell you. For some properties, selling through an estate agent (makelaar) or to another investor may be a better route.` },
-          { p: `Owners who sell several properties do so for reasons such as retirement, a reallocation of assets, succession within the family or the tax burden on private letting. If box 3 plays a part in your thinking about selling rental homes, have a tax adviser work out the consequences first. You can read more background in our article on [box 3 and property in 2026](/kennisbank/box-3-vastgoed-2026/).` },
+          { p: `Owners who sell several properties do so for reasons such as retirement, a reallocation of assets, succession within the family or the tax burden on private letting. If box 3 plays a part in your thinking about selling rental homes, have a tax adviser work out the consequences first. You can read more background in our article on box 3 and property in 2026.` },
         ],
       },
       {
@@ -88,7 +88,7 @@ export default [
         h: `Transfer tax and costs when selling a portfolio`,
         blocks: [
           { p: `When selling to an investor, the buyer normally pays transfer tax. For homes the buyer will not live in themselves, such as rental homes, the rate in 2026 is **8%**; that rate was reduced from 10.4% on 1 January 2026. For commercial buildings, offices, shops and land the rate is **10.4%**. In a mixed portfolio, the applicable rate is determined for each property.` },
-          { p: `In a sale on buyer's costs (kosten koper) terms, transfer tax and the notary's fees for the deed of transfer are paid by the buyer. An investor does factor these costs into their calculation. Because you sell directly to Windmill, you pay no estate agent's commission; who pays what is set out in our proposal in advance. With commercial property, VAT (btw) can play a role in some cases, for example with recently completed buildings. Have a tax adviser assess this. You can read more about the rates in our article on [transfer tax in 2026](/kennisbank/overdrachtsbelasting-2026/).` },
+          { p: `In a sale on buyer's costs (kosten koper) terms, transfer tax and the notary's fees for the deed of transfer are paid by the buyer. An investor does factor these costs into their calculation. Because you sell directly to Windmill, you pay no estate agent's commission; who pays what is set out in our proposal in advance. With commercial property, VAT (btw) can play a role in some cases, for example with recently completed buildings. Have a tax adviser assess this. You can read more about the rates in our article on transfer tax in 2026.` },
           { callout: { t: `What Windmill does and does not do`, d: `Selling a property portfolio often has legal and tax consequences. Windmill assesses your portfolio as a buyer and makes a well-reasoned proposal, but does not give tax or legal advice, and our proposal is not a validated valuation report. For that, you engage a tax adviser, lawyer or registered valuer. We are happy to coordinate with them.` } },
         ],
       },
@@ -98,8 +98,8 @@ export default [
           {
             cards: [
               { t: `Selling an investment property`, d: `Selling a single investment property, with or without tenants.`, href: '/beleggingspand-verkopen/', label: `Selling an investment property` },
-              { t: `Property portfolio management`, d: `Would you rather keep the portfolio and outsource the management? That is also an option.`, href: '/vastgoedportefeuillebeheer/', label: `Portfolio management` },
-              { t: `Property due diligence`, d: `Insight into the legal, technical and financial condition of your properties.`, href: '/vastgoed-due-diligence/', label: `Due diligence` },
+              { t: `Property portfolio management`, d: `Would you rather keep the portfolio and outsource the management? That is also an option.` },
+              { t: `Property due diligence`, d: `Insight into the legal, technical and financial condition of your properties.` },
             ],
           },
         ],
@@ -128,7 +128,7 @@ export default [
     keyword: `sell inherited house Netherlands`,
     secondary: [`sell house from inheritance Netherlands`, `sell parents' house`, `sell home after death Netherlands`, `inherited house sale tax Netherlands`],
     form: 'verkoop',
-    related: ['/huis-verkopen/', '/leegstaande-woning-verkopen/', '/huis-verkopen-met-achterstallig-onderhoud/', '/huis-verkopen-vanuit-het-buitenland/', '/vastgoed-waardebepaling/'],
+    related: ['/huis-verkopen/', '/leegstaande-woning-verkopen/', '/huis-verkopen-met-achterstallig-onderhoud/', '/huis-verkopen-vanuit-het-buitenland/'],
     eyebrow: `Selling · Inheritance`,
     intro: `Selling an inherited house takes time, consultation with the other heirs (erfgenamen) and a number of formal steps at the civil-law notary (notaris). Windmill Invest can buy the house directly if it fits our acquisition criteria, with or without its contents, by agreement. We calmly explain what is needed and will tell you honestly if another route suits you better.`,
     heroPoints: [`With or without contents, by agreement`, `No estate agent's commission on a direct sale`, `Also with heirs living abroad`],
@@ -201,14 +201,14 @@ export default [
         h: `Inheritance, selling the house and tax`,
         blocks: [
           { p: `An inheritance often comes with an inheritance tax return. For deaths on or after 1 January 2026, the deadline for that return is **20 months**; before that it was 8 months. How much inheritance tax you pay and what value applies to the house depends on your situation. The notary or a tax adviser can calculate this for you and take care of the return.` },
-          { p: `In addition, as long as the house has not been sold and none of the heirs lives in it, the home may count towards box 3. What you do with the proceeds can also have tax consequences. So seek advice before making final decisions. You can find general information in our article on [box 3 and property in 2026](/kennisbank/box-3-vastgoed-2026/).` },
+          { p: `In addition, as long as the house has not been sold and none of the heirs lives in it, the home may count towards box 3. What you do with the proceeds can also have tax consequences. So seek advice before making final decisions. You can find general information in our article on box 3 and property in 2026.` },
         ],
       },
       {
         h: `Heirs living abroad and a house in poor condition`,
         blocks: [
           { p: `You can sell an inherited house even if some heirs live far away. Through the notary, an heir can grant a power of attorney (volmacht) so that someone else signs on their behalf. Depending on the country, legalisation or an apostille may be required; the notary will tell you what is needed. Read more about [selling a house from abroad](/huis-verkopen-vanuit-het-buitenland/).` },
-          { p: `Has maintenance been put off for years, or does the house have defects? Selling a home after a death is still perfectly possible. A buyer who renovates the property themselves takes this into account in the proposal; see our page on [selling a house with a maintenance backlog](/huis-verkopen-met-achterstallig-onderhoud/). If you first want to know roughly what the house is worth, you can request an [indicative valuation](/vastgoed-waardebepaling/).` },
+          { p: `Has maintenance been put off for years, or does the house have defects? Selling a home after a death is still perfectly possible. A buyer who renovates the property themselves takes this into account in the proposal; see our page on [selling a house with a maintenance backlog](/huis-verkopen-met-achterstallig-onderhoud/). If you first want to know roughly what the house is worth, you can request an indicative valuation.` },
         ],
       },
     ],
@@ -235,7 +235,7 @@ export default [
     keyword: `sell house needing repairs Netherlands`,
     secondary: [`sell fixer-upper Netherlands`, `sell house with defects`, `sell house with foundation problems`, `sell house with asbestos`],
     form: 'verkoop',
-    related: ['/huis-verkopen/', '/huis-verkopen-aan-opkoper/', '/vastgoedrenovatie/', '/geerfd-huis-verkopen/', '/leegstaande-woning-verkopen/'],
+    related: ['/huis-verkopen/', '/huis-verkopen-aan-opkoper/', '/geerfd-huis-verkopen/', '/leegstaande-woning-verkopen/'],
     eyebrow: `Selling · Condition of the home`,
     intro: `You can sell a house with a maintenance backlog (achterstallig onderhoud) without first carrying out the work yourself. Windmill Invest buys homes in their current condition if they fit our acquisition criteria, and factors the necessary renovation into a well-reasoned proposal. We are honest about it: defects reduce the value, and you will see that reflected in the price.`,
     heroPoints: [`Sell in its current condition`, `No renovation needed beforehand`, `Well-reasoned proposal, honest about defects`],
@@ -250,7 +250,7 @@ export default [
       {
         h: `Selling a house with a maintenance backlog to a buyer who renovates`,
         blocks: [
-          { p: `Windmill Invest buys property in its own name and also carries out [renovation](/vastgoedrenovatie/) and [sustainability improvements](/vastgoed-verduurzamen/), together with partners such as contractors, installers and energy advisers. We cost the necessary work and include it in our proposal. So you do not have to invest in repairs first, request quotes or oversee a renovation.` },
+          { p: `Windmill Invest buys property in its own name and also carries out renovation and sustainability improvements, together with partners such as contractors, installers and energy advisers. We cost the necessary work and include it in our proposal. So you do not have to invest in repairs first, request quotes or oversee a renovation.` },
           { p: `Whether it pays to carry out repairs yourself first is not a given. Small repairs can make a home more attractive to private buyers, but with larger renovations it is uncertain whether you will recover the costs. We show you how we arrive at our proposal, so you can compare for yourself. Include the [costs of selling a house](/kennisbank/kosten-huis-verkopen/) in that comparison too.` },
           { p: `Selling a house with a maintenance backlog does not mean that every home is a fit for us, though. We look at every request and give an honest answer. Sometimes selling through an estate agent (makelaar) to a private buyer who wants to do the work themselves is a better route.` },
         ],
@@ -416,7 +416,7 @@ export default [
         h: `Selling a second home and box 3`,
         blocks: [
           { p: `If you do not live in the home yourself, that has tax consequences. A second home that you do not use as your main residence generally falls in box 3. In 2026, private individuals pay tax there on a deemed return, with no deduction for costs such as maintenance. There is a rebuttal scheme (tegenbewijsregeling), and what box 3 will look like in the future is politically uncertain.` },
-          { p: `Different rules may apply to a home you recently moved out of and that is up for sale. Whether your home falls in box 1 or box 3 depends on your situation. Have a tax adviser assess this. You can find more background in our article on [box 3 and property in 2026](/kennisbank/box-3-vastgoed-2026/).` },
+          { p: `Different rules may apply to a home you recently moved out of and that is up for sale. Whether your home falls in box 1 or box 3 depends on your situation. Have a tax adviser assess this. You can find more background in our article on box 3 and property in 2026.` },
         ],
       },
       {
@@ -463,7 +463,7 @@ export default [
     keyword: `sale and rent back Netherlands`,
     secondary: [`sell home and stay living there`, `release home equity Netherlands`, `sale and leaseback home`, `sale and rent back risks`],
     form: 'verkoop',
-    related: ['/huis-verkopen/', '/verhuurde-woning-verkopen/', '/kennisbank/koop-breekt-geen-huur/', '/vastgoed-waardebepaling/', '/kennisbank/kosten-huis-verkopen/'],
+    related: ['/huis-verkopen/', '/verhuurde-woning-verkopen/', '/kennisbank/koop-breekt-geen-huur/', '/kennisbank/kosten-huis-verkopen/'],
     eyebrow: `Selling · Sale and rent back`,
     intro: `When you sell your house and rent it back (verkopen en terughuren), you sell your home and continue to live there as a tenant. Windmill Invest only offers this in situations where it is suitable, under clearly recorded terms and after you have been able to obtain independent legal and financial advice. On this page you can read how it works, who it may suit and what risks are involved.`,
     heroPoints: [`Only in suitable situations`, `Terms set out in writing in advance`, `Always with independent advice`],
@@ -554,7 +554,7 @@ export default [
         h: `Releasing home equity: compare the alternatives`,
         blocks: [
           { p: `If you want to release the equity in your home, you often have more options than selling your house and renting it back. Think of selling and moving to a smaller home, adjusting your mortgage, or financial products aimed specifically at older homeowners. An independent financial adviser can compare these options with you. Windmill does not give mortgage or financial advice.` },
-          { p: `If you would rather sell and move, read more about [selling a house](/huis-verkopen/) or first request an [indicative valuation](/vastgoed-waardebepaling/). With an overview of the [costs of selling a house](/kennisbank/kosten-huis-verkopen/), you can compare the options properly.` },
+          { p: `If you would rather sell and move, read more about [selling a house](/huis-verkopen/) or first request an indicative valuation. With an overview of the [costs of selling a house](/kennisbank/kosten-huis-verkopen/), you can compare the options properly.` },
         ],
       },
     ],
@@ -640,7 +640,7 @@ export default [
         h: `The home in the meantime`,
         blocks: [
           { p: `Selling a house from abroad also requires attention to the home itself. If your house stands empty while the sale is in progress, arrange for someone to keep an eye on it. Have the post collected and the home aired regularly, and set the heating to a safe level in winter. Inform your insurer about the vacancy, as separate conditions often apply. You can read more about this on our page on [selling a vacant home](/leegstaande-woning-verkopen/).` },
-          { p: `If the home is let, the tenant simply stays and the tenancy agreement passes to the buyer on sale; see [selling a let home](/verhuurde-woning-verkopen/). If you would rather keep the home and have it managed, take a look at our [property management](/vastgoedbeheer/).` },
+          { p: `If the home is let, the tenant simply stays and the tenancy agreement passes to the buyer on sale; see [selling a let home](/verhuurde-woning-verkopen/). If you would rather keep the home and have it managed, take a look at our property management.` },
           { callout: { t: `What Windmill does not do`, d: `Windmill is a buyer, not a notary, tax adviser or financial adviser. Questions about the power of attorney, legalisation or apostille are answered by the notary. For tax in the Netherlands and in your country of residence, we refer you to a tax adviser with international experience.` } },
         ],
       },

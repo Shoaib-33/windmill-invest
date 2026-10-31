@@ -391,7 +391,7 @@ export default [
         h: `Article 5. Indicative valuations and analyses`,
         blocks: [
           { p: `5.1 An indicative valuation, yield indication, feasibility study or other analysis by Windmill Invest is a broad estimate based on the information available. It is not a formal valuation and not a validated valuation report by a registered valuer.` },
-          { p: `5.2 An indicative valuation is not intended or suitable for applying for a mortgage or other financing, for tax purposes or for other purposes for which a valuation report is required. If you need an official valuation, you can engage a registered valuer. You can read more about this on our page on [property valuation](/vastgoed-waardebepaling/).` },
+          { p: `5.2 An indicative valuation is not intended or suitable for applying for a mortgage or other financing, for tax purposes or for other purposes for which a valuation report is required. If you need an official valuation, you can engage a registered valuer. You can read more about this on our page on property valuation.` },
           { p: `5.3 Analyses and indications are not legal, tax or financial advice and not investment advice. You remain responsible for your own decisions. We recommend that you seek independent advice for important decisions.` },
           { p: `5.4 No entitlement to a particular price, return, timeframe or other result can be derived from an indicative valuation or analysis.` },
         ],

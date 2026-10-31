@@ -34,7 +34,13 @@ const BAG = {
   '1012JS-5': ['B', 'C'].map((l, i) => ({ id: `036301001211009${3 + i}`, label: `Dam 5${l}, 1012JS Amsterdam`, street: 'Dam', house_number: '5', house_letter: l, house_addition: '', postcode: '1012JS', city: 'Amsterdam', bag_vbo_id: `036301001211009${3 + i}`, bag_nummeraanduiding_id: `036320001211180${7 + i}` })),
 };
 const addressLookup = async (pc, nr) => BAG[`${String(pc).replace(/\s/g, '').toUpperCase()}-${String(nr).match(/^\d+/)?.[0]}`] || [];
-const server = await createApp({ dbPath: process.env.TEST_DATABASE_URL || process.env.TEST_STORAGE || 'memory://', maxSubmissions: 80, crm, addressLookup });
+// Stand-ins for the BAG building facts and the aerial photo tiles (no internet in tests).
+const houseDetails = async (id) => (id === '0363010003761571' ? { build_year: 1914, area_m2: 120, use: 'woonfunctie' } : null);
+const tileFetch = async (z, x, y) => (z === 18 ? Buffer.from([0xff, 0xd8, 0xff, 0xd9]) : null);
+const CUBE = { v: [[-1, -1, 0], [1, -1, 0], [1, 1, 0], [-1, 1, 0], [-1, -1, 2], [1, -1, 2], [1, 1, 2], [-1, 1, 2]], f: [[2, 4, 5, 6, 7], [1, 0, 1, 5, 4]] };
+const model3d = async (pandId) => (pandId === '0363100012168052' ? CUBE : null);
+const houseWithPand = async (id) => { const d = await houseDetails(id); return d && { ...d, pand_id: '0363100012168052' }; };
+const server = await createApp({ dbPath: process.env.TEST_DATABASE_URL || process.env.TEST_STORAGE || 'memory://', maxSubmissions: 80, crm, addressLookup, houseDetails: houseWithPand, tileFetch, model3d });
 const waitFor = async (check, ms = 4000) => {
   const end = Date.now() + ms;
   for (;;) {
@@ -203,17 +209,17 @@ await test('asking to be called or WhatsApped requires a phone number', async ()
   assert.ok((await r.json()).errors.phone);
 });
 
-await test('leads are tagged with a seller avatar (buyers get none)', async () => {
+await test('leads are tagged with a seller avatar (a general question gets none)', async () => {
   const geerfd = await (await post({ ...valid, lead_id: randomUUID(), situation: 'geerfd' })).json();
   const klus = await (await post({ ...valid, lead_id: randomUUID(), situation: 'onderhoud' })).json();
   const campaign = await (await post({ ...valid, lead_id: randomUUID(), situation: 'verhuizen', utm_campaign: 'WI_G_fatigued_investor_verhuurd' })).json();
-  const buyer = await (await post({ form_type: 'investeerder', page: '/beleggingspand-kopen/', investor_type: 'bv', budget: 'lt500k', asset_pref: 'woningen', name: 'Koper', email: 'k@example.nl', phone: '0612345678', consent_privacy: true, lead_id: randomUUID() })).json();
+  const question = await (await post({ form_type: 'contact', page: '/contact/', subject: 'anders', message: 'Vraag', name: 'Vrager', email: 'v@example.nl', consent_privacy: true, lead_id: randomUUID() })).json();
   const rows = await server.db.list({ limit: 50 });
   const avatar = (id) => rows.find((r) => r.id === id).avatar;
   assert.equal(avatar(geerfd.id), 'distressed_urgent');
   assert.equal(avatar(klus.id), 'klushuis_low_label');
   assert.equal(avatar(campaign.id), 'fatigued_investor');
-  assert.equal(avatar(buyer.id), null);
+  assert.equal(avatar(question.id), null);
 });
 
 await test('each lead reaches the CRM as a signed lead.created event matching the contract', async () => {
@@ -254,9 +260,11 @@ await test('a lead the CRM rejects is kept and marked failed, not lost', async (
   assert.match(html, /mislukt/);
 });
 
-await test('the 7 ad landing pages load in Dutch and English, are noindex, and stay out of the sitemap', async () => {
+await test('the 7 ad landing pages and the letter page load in Dutch and English, are noindex, and stay out of the sitemap', async () => {
   const funnels = JSON.parse(readFileSync(new URL('../dist/funnels.json', import.meta.url), 'utf8'));
-  assert.equal(funnels.length, 7);
+  assert.equal(funnels.length, 8);
+  assert.ok(funnels.includes('/brief/'));
+  assert.match(await (await fetch(base + '/brief/')).text(), /data-letter-code/);
   const sitemap = await (await fetch(base + '/sitemap.xml')).text();
   // One link per page: Dutch by default, English on the same URL with ?lang=en.
   for (const path of funnels.flatMap((s) => [s, s + '?lang=en'])) {
@@ -428,6 +436,56 @@ await test('address lookup: the API lists BAG matches and leads get the chosen B
   assert.equal(sent.json.property.street, 'Dam');
 });
 
+await test('the found home gets its BAG facts: on screen, in the lead and as aerial tiles', async () => {
+  const house = await (await fetch(base + '/api/house?id=0363010003761571')).json();
+  assert.deepEqual(house.details, { build_year: 1914, area_m2: 120, use: 'woonfunctie' });
+  assert.equal((await (await fetch(base + '/api/house?id=nope')).json()).details, null);
+  const tile = await fetch(base + '/api/tile/18/134635/86146.jpg');
+  assert.equal(tile.status, 200);
+  assert.equal(tile.headers.get('content-type'), 'image/jpeg');
+  assert.equal((await fetch(base + '/api/tile/12/1/1.jpg')).status, 404);
+  const lead_id = randomUUID();
+  await post({ ...valid, lead_id, postcode: '1012 JS', house_number: '1' });
+  const row = (await server.db.list({ limit: 100 })).find((x) => x.lead_id === lead_id);
+  assert.equal(row.data.bag_build_year, 1914);
+  assert.equal(row.data.bag_area_m2, 120);
+  assert.equal(row.data.bag_use, 'woonfunctie');
+});
+
+await test('the found home comes in 3D when the 3D BAG has it, and the home page tells the steps as a story', async () => {
+  assert.deepEqual((await (await fetch(base + '/api/model?id=0363010003761571')).json()).model, CUBE);
+  assert.equal((await (await fetch(base + '/api/model?id=0000000000000000')).json()).model, null);
+  const home = await (await fetch(base + '/')).text();
+  assert.match(home, /data-story-stage/);
+  assert.match(home, /data-mic/);
+});
+
+await test('call me back: name and phone are enough, and only the boxes shown are logged', async () => {
+  const lead_id = randomUUID();
+  const r = await post({ form_type: 'terugbellen', page: '/', name: 'Bel Mij', phone: '06 12345678', call_moment: 'middag', consent_privacy: true, consent_phone: true, lead_id });
+  assert.equal(r.status, 201, JSON.stringify(await r.clone().json()));
+  const rows = await server.db.consents(lead_id);
+  assert.deepEqual(rows.map((c) => c.channel).sort(), ['any', 'phone']);
+  assert.equal((await post({ form_type: 'terugbellen', page: '/', name: 'Bel Mij', consent_privacy: true })).status, 422);
+  const home = await (await fetch(base + '/')).text();
+  assert.match(home, /data-callback-dialog/);
+  assert.equal((home.match(/id="f-name"/g) || []).length, 1);
+  assert.equal((home.match(/id="cb-name"/g) || []).length, 1);
+});
+
+await test('every page has the slide-in offer form; "already for sale?" is asked and stored', async () => {
+  const page = await (await fetch(base + '/geerfd-huis-verkopen/')).text();
+  assert.match(page, /data-offer-drawer/);
+  assert.match(page, /data-offer-open/);
+  assert.equal((page.match(/id="sl-postcode"/g) || []).length, 1);
+  assert.match(page, /name="already_listed"/);
+  const lead_id = randomUUID();
+  assert.equal((await post({ ...valid, lead_id, already_listed: 'makelaar' })).status, 201);
+  const row = (await server.db.list({ limit: 100 })).find((x) => x.lead_id === lead_id);
+  assert.equal(row.data.already_listed, 'makelaar');
+  assert.equal((await post({ ...valid, lead_id: randomUUID(), already_listed: 'misschien' })).status, 422);
+});
+
 await test('honeypot pretends success without storing', async () => {
   const before = (await (await fetch(base + '/admin/inquiries.csv', { headers: auth })).text()).split('\r\n').length;
   const r = await post({ ...valid, website: 'http://spam' });
@@ -443,6 +501,17 @@ await test('cross-site posts are refused', async () => {
 await test('admin requires login', async () => {
   assert.equal((await fetch(base + '/admin')).status, 401);
   assert.equal((await fetch(base + '/admin', { headers: auth })).status, 200);
+});
+
+await test('admin in Dutch and English, answers in plain words', async () => {
+  const nl = await (await fetch(base + '/admin', { headers: auth })).text();
+  const en = await (await fetch(base + '/admin?lang=en', { headers: auth })).text();
+  assert.match(nl, /<h1>Aanvragen \(/);
+  assert.match(nl, /href="\/admin\?lang=en">EN</);
+  assert.match(en, /<h1>Inquiries \(/);
+  assert.match(en, /href="\/admin">NL</);
+  assert.match(en, /<b>When would you like to sell\?<\/b>: /);
+  assert.doesNotMatch(en, /<b>timeline<\/b>/);
 });
 
 await test('rate limit kicks in', async () => {

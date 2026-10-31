@@ -11,7 +11,7 @@ export default [
     keyword: `vastgoedportefeuille verkopen`,
     secondary: [`meerdere panden verkopen`, `portefeuille huurwoningen verkopen`, `uitponden of in één keer verkopen`, `huurwoningen verkopen box 3`],
     form: 'commercieel',
-    related: ['/beleggingspand-verkopen/', '/verhuurde-woning-verkopen/', '/bedrijfspand-verkopen/', '/vastgoedportefeuillebeheer/', '/commercieel-vastgoed/'],
+    related: ['/beleggingspand-verkopen/', '/verhuurde-woning-verkopen/', '/bedrijfspand-verkopen/'],
     eyebrow: `Verkopen · Portefeuilles`,
     intro: `Een vastgoedportefeuille verkopen kan in één transactie aan één koper, of door de panden afzonderlijk te verkopen. Windmill Invest koopt woning- en bedrijfsportefeuilles in eigen naam als ze binnen onze aankoopcriteria passen, ook als het om een deel van de portefeuille gaat. U ontvangt een vrijblijvend en onderbouwd voorstel, of een eerlijk antwoord als uw portefeuille niet bij ons past.`,
     heroPoints: [`Discrete behandeling van uw gegevens`, `Ook een deel van de portefeuille bespreekbaar`, `Geen makelaarscourtage bij directe verkoop`],
@@ -21,7 +21,7 @@ export default [
         blocks: [
           { p: `Een vastgoedportefeuille verkopen vraagt om andere keuzes dan de verkoop van één woning. Verkoopt u alles tegelijk of pand voor pand? Wat gebeurt er met de huurders? En hoe houdt u de verkoop discreet, zodat huurders, medewerkers en de markt niet onnodig onrustig worden?` },
           { p: `Windmill Invest koopt als directe koper woningen, appartementencomplexen, bedrijfspanden en gemengde portefeuilles. Wij beoordelen de portefeuille als geheel en elk object afzonderlijk. Past een deel wel en een deel niet binnen onze aankoopcriteria, dan zeggen wij dat. Voor sommige panden kan verkoop via een makelaar of aan een andere belegger een betere route zijn.` },
-          { p: `Eigenaren die meerdere panden verkopen, doen dat bijvoorbeeld vanwege pensionering, een herschikking van vermogen, opvolging binnen de familie of de fiscale druk op particuliere verhuur. Speelt box 3 mee in uw overweging om huurwoningen te verkopen, laat de gevolgen dan eerst doorrekenen door een fiscalist. Meer achtergrond leest u in ons artikel over [box 3 en vastgoed in 2026](/kennisbank/box-3-vastgoed-2026/).` },
+          { p: `Eigenaren die meerdere panden verkopen, doen dat bijvoorbeeld vanwege pensionering, een herschikking van vermogen, opvolging binnen de familie of de fiscale druk op particuliere verhuur. Speelt box 3 mee in uw overweging om huurwoningen te verkopen, laat de gevolgen dan eerst doorrekenen door een fiscalist. Meer achtergrond leest u in ons artikel over box 3 en vastgoed in 2026.` },
         ],
       },
       {
@@ -88,7 +88,7 @@ export default [
         h: `Overdrachtsbelasting en kosten bij een portefeuilleverkoop`,
         blocks: [
           { p: `Bij een verkoop aan een belegger betaalt de koper in de regel overdrachtsbelasting. Voor woningen die de koper niet zelf bewoont, zoals huurwoningen, is het tarief in 2026 **8%**; dat tarief is op 1 januari 2026 verlaagd van 10,4%. Voor bedrijfspanden, kantoren, winkels en grond geldt **10,4%**. Bij een gemengde portefeuille wordt per object bepaald welk tarief van toepassing is.` },
-          { p: `Bij een verkoop kosten koper zijn de overdrachtsbelasting en de notariskosten voor de leveringsakte voor de koper. Een belegger neemt deze kosten wel mee in zijn berekening. Omdat u direct aan Windmill verkoopt, betaalt u geen makelaarscourtage; wat voor wiens rekening komt, staat vooraf in ons voorstel. Bij commercieel vastgoed kan in sommige gevallen btw een rol spelen, bijvoorbeeld bij recent opgeleverde gebouwen. Laat dat beoordelen door een fiscaal adviseur. Meer over de tarieven leest u in ons artikel over [overdrachtsbelasting in 2026](/kennisbank/overdrachtsbelasting-2026/).` },
+          { p: `Bij een verkoop kosten koper zijn de overdrachtsbelasting en de notariskosten voor de leveringsakte voor de koper. Een belegger neemt deze kosten wel mee in zijn berekening. Omdat u direct aan Windmill verkoopt, betaalt u geen makelaarscourtage; wat voor wiens rekening komt, staat vooraf in ons voorstel. Bij commercieel vastgoed kan in sommige gevallen btw een rol spelen, bijvoorbeeld bij recent opgeleverde gebouwen. Laat dat beoordelen door een fiscaal adviseur. Meer over de tarieven leest u in ons artikel over overdrachtsbelasting in 2026.` },
           { callout: { t: `Wat Windmill wel en niet doet`, d: `Een vastgoedportefeuille verkopen heeft vaak juridische en fiscale gevolgen. Windmill beoordeelt uw portefeuille als koper en doet een onderbouwd voorstel, maar geeft geen fiscaal of juridisch advies, en ons voorstel is geen gevalideerd taxatierapport. Daarvoor schakelt u een fiscalist, advocaat of register-taxateur in. Wij stemmen graag met hen af.` } },
         ],
       },
@@ -98,8 +98,8 @@ export default [
           {
             cards: [
               { t: `Beleggingspand verkopen`, d: `Eén beleggingsobject verkopen, met of zonder huurders.`, href: '/beleggingspand-verkopen/', label: `Beleggingspand verkopen` },
-              { t: `Vastgoedportefeuillebeheer`, d: `Liever aanhouden en het beheer uitbesteden? Ook dat is een mogelijkheid.`, href: '/vastgoedportefeuillebeheer/', label: `Portefeuillebeheer` },
-              { t: `Vastgoed due diligence`, d: `Inzicht in de juridische, technische en financiële staat van uw panden.`, href: '/vastgoed-due-diligence/', label: `Due diligence` },
+              { t: `Vastgoedportefeuillebeheer`, d: `Liever aanhouden en het beheer uitbesteden? Ook dat is een mogelijkheid.` },
+              { t: `Vastgoed due diligence`, d: `Inzicht in de juridische, technische en financiële staat van uw panden.` },
             ],
           },
         ],
@@ -128,7 +128,7 @@ export default [
     keyword: `geërfd huis verkopen`,
     secondary: [`huis uit erfenis verkopen`, `ouderlijk huis verkopen`, `woning verkopen na overlijden`, `erfenis huis verkopen belasting`],
     form: 'verkoop',
-    related: ['/huis-verkopen/', '/leegstaande-woning-verkopen/', '/huis-verkopen-met-achterstallig-onderhoud/', '/huis-verkopen-vanuit-het-buitenland/', '/vastgoed-waardebepaling/'],
+    related: ['/huis-verkopen/', '/leegstaande-woning-verkopen/', '/huis-verkopen-met-achterstallig-onderhoud/', '/huis-verkopen-vanuit-het-buitenland/'],
     eyebrow: `Verkopen · Erfenis`,
     intro: `Een geërfd huis verkopen vraagt om tijd, overleg met de andere erfgenamen en een aantal formele stappen bij de notaris. Windmill Invest kan de woning direct kopen als die binnen onze aankoopcriteria past, met of zonder inboedel, in overleg. Wij leggen rustig uit wat er nodig is en zeggen het eerlijk als een andere route beter bij u past.`,
     heroPoints: [`Met of zonder inboedel, in overleg`, `Geen makelaarscourtage bij directe verkoop`, `Ook met erfgenamen in het buitenland`],
@@ -201,14 +201,14 @@ export default [
         h: `Erfenis, huis verkopen en belasting`,
         blocks: [
           { p: `Bij een erfenis hoort vaak een aangifte erfbelasting. Voor overlijdens op of na 1 januari 2026 is de termijn voor die aangifte **20 maanden**; daarvoor was dat 8 maanden. Hoeveel erfbelasting u betaalt en welke waarde voor de woning geldt, hangt af van uw situatie. De notaris of een fiscalist kan dat voor u uitrekenen en de aangifte verzorgen.` },
-          { p: `Zolang het huis niet is verkocht en geen van de erfgenamen er zelf woont, kan de woning bovendien meetellen in box 3. Ook wat u met de opbrengst doet, kan fiscale gevolgen hebben. Vraag daarom advies voordat u definitieve keuzes maakt. Algemene informatie vindt u in ons artikel over [box 3 en vastgoed in 2026](/kennisbank/box-3-vastgoed-2026/).` },
+          { p: `Zolang het huis niet is verkocht en geen van de erfgenamen er zelf woont, kan de woning bovendien meetellen in box 3. Ook wat u met de opbrengst doet, kan fiscale gevolgen hebben. Vraag daarom advies voordat u definitieve keuzes maakt. Algemene informatie vindt u in ons artikel over box 3 en vastgoed in 2026.` },
         ],
       },
       {
         h: `Erfgenamen in het buitenland en een woning in slechte staat`,
         blocks: [
           { p: `Ook met erfgenamen op afstand kunt u een geërfd huis verkopen. Via de notaris kan een erfgenaam een volmacht geven, zodat iemand anders namens hem of haar tekent. Afhankelijk van het land kan daarvoor een legalisatie of apostille nodig zijn; de notaris vertelt u wat er nodig is. Lees meer over [een huis verkopen vanuit het buitenland](/huis-verkopen-vanuit-het-buitenland/).` },
-          { p: `Is het onderhoud jarenlang uitgesteld of heeft de woning gebreken? Ook dan is een woning verkopen na overlijden goed mogelijk. Een koper die zelf renoveert, neemt dat mee in het voorstel; zie onze pagina over [een huis verkopen met achterstallig onderhoud](/huis-verkopen-met-achterstallig-onderhoud/). Wilt u eerst weten wat de woning ongeveer waard is, dan kunt u een [indicatieve waardebepaling](/vastgoed-waardebepaling/) aanvragen.` },
+          { p: `Is het onderhoud jarenlang uitgesteld of heeft de woning gebreken? Ook dan is een woning verkopen na overlijden goed mogelijk. Een koper die zelf renoveert, neemt dat mee in het voorstel; zie onze pagina over [een huis verkopen met achterstallig onderhoud](/huis-verkopen-met-achterstallig-onderhoud/). Wilt u eerst weten wat de woning ongeveer waard is, dan kunt u een indicatieve waardebepaling aanvragen.` },
         ],
       },
     ],
@@ -235,7 +235,7 @@ export default [
     keyword: `huis verkopen met achterstallig onderhoud`,
     secondary: [`opknaphuis verkopen`, `huis met gebreken verkopen`, `huis met funderingsproblemen verkopen`, `huis met asbest verkopen`],
     form: 'verkoop',
-    related: ['/huis-verkopen/', '/huis-verkopen-aan-opkoper/', '/vastgoedrenovatie/', '/geerfd-huis-verkopen/', '/leegstaande-woning-verkopen/'],
+    related: ['/huis-verkopen/', '/huis-verkopen-aan-opkoper/', '/geerfd-huis-verkopen/', '/leegstaande-woning-verkopen/'],
     eyebrow: `Verkopen · Staat van de woning`,
     intro: `Een huis verkopen met achterstallig onderhoud kan zonder dat u eerst zelf gaat verbouwen. Windmill Invest koopt woningen in de huidige staat als ze binnen onze aankoopcriteria passen, en neemt de benodigde renovatie mee in een onderbouwd voorstel. Wij zijn daarbij eerlijk: gebreken verlagen de waarde, en dat ziet u terug in de prijs.`,
     heroPoints: [`Verkopen in de huidige staat`, `Geen verbouwing vooraf nodig`, `Onderbouwd voorstel, eerlijk over gebreken`],
@@ -250,7 +250,7 @@ export default [
       {
         h: `Huis verkopen met achterstallig onderhoud aan een koper die renoveert`,
         blocks: [
-          { p: `Windmill Invest koopt vastgoed in eigen naam en verzorgt ook [renovatie](/vastgoedrenovatie/) en [verduurzaming](/vastgoed-verduurzamen/), samen met partners zoals aannemers, installateurs en energieadviseurs. Wij rekenen de benodigde werkzaamheden door en verwerken die in ons voorstel. U hoeft dus niet eerst te investeren in herstel, offertes op te vragen of een verbouwing te begeleiden.` },
+          { p: `Windmill Invest koopt vastgoed in eigen naam en verzorgt ook renovatie en verduurzaming, samen met partners zoals aannemers, installateurs en energieadviseurs. Wij rekenen de benodigde werkzaamheden door en verwerken die in ons voorstel. U hoeft dus niet eerst te investeren in herstel, offertes op te vragen of een verbouwing te begeleiden.` },
           { p: `Of het financieel loont om eerst zelf te herstellen, is niet vanzelfsprekend. Kleine reparaties kunnen een woning aantrekkelijker maken voor particuliere kopers, maar bij grotere renovaties is het onzeker of u de kosten terugverdient. Wij laten u zien hoe wij tot ons voorstel komen, zodat u zelf kunt vergelijken. Ook de [kosten van een huis verkopen](/kennisbank/kosten-huis-verkopen/) neemt u daarin mee.` },
           { p: `Een huis verkopen met achterstallig onderhoud betekent overigens niet dat elke woning bij ons past. Wij kijken naar elke aanvraag en geven een eerlijk antwoord. Soms is verkoop via een makelaar aan een particuliere koper die zelf wil klussen een betere route.` },
         ],
@@ -416,7 +416,7 @@ export default [
         h: `Tweede woning verkopen en box 3`,
         blocks: [
           { p: `Woont u niet zelf in de woning, dan heeft dat fiscale gevolgen. Een tweede woning die u niet als hoofdverblijf gebruikt, valt in de regel in box 3. Particulieren betalen daar in 2026 belasting over een forfaitair rendement, zonder aftrek van kosten zoals onderhoud. Er bestaat een tegenbewijsregeling, en hoe box 3 er in de toekomst uitziet, is politiek onzeker.` },
-          { p: `Voor een woning die u kort geleden heeft verlaten en die te koop staat, kunnen andere regels gelden. Of uw woning in box 1 of box 3 valt, hangt af van uw situatie. Laat dit beoordelen door een fiscalist. Meer achtergrond vindt u in ons artikel over [box 3 en vastgoed in 2026](/kennisbank/box-3-vastgoed-2026/).` },
+          { p: `Voor een woning die u kort geleden heeft verlaten en die te koop staat, kunnen andere regels gelden. Of uw woning in box 1 of box 3 valt, hangt af van uw situatie. Laat dit beoordelen door een fiscalist. Meer achtergrond vindt u in ons artikel over box 3 en vastgoed in 2026.` },
         ],
       },
       {
@@ -463,7 +463,7 @@ export default [
     keyword: `huis verkopen en terughuren`,
     secondary: [`woning verkopen en blijven wonen`, `overwaarde verzilveren`, `sale and leaseback woning`, `verkopen en terughuren risico's`],
     form: 'verkoop',
-    related: ['/huis-verkopen/', '/verhuurde-woning-verkopen/', '/kennisbank/koop-breekt-geen-huur/', '/vastgoed-waardebepaling/', '/kennisbank/kosten-huis-verkopen/'],
+    related: ['/huis-verkopen/', '/verhuurde-woning-verkopen/', '/kennisbank/koop-breekt-geen-huur/', '/kennisbank/kosten-huis-verkopen/'],
     eyebrow: `Verkopen · Verkopen en terughuren`,
     intro: `Bij huis verkopen en terughuren verkoopt u uw woning en blijft u er als huurder wonen. Windmill Invest biedt dit alleen aan in situaties waarin het passend is, onder duidelijk vastgelegde voorwaarden en nadat u onafhankelijk juridisch en financieel advies heeft kunnen inwinnen. Op deze pagina leest u hoe het werkt, voor wie het kan passen en welke risico's eraan verbonden zijn.`,
     heroPoints: [`Alleen in passende situaties`, `Voorwaarden vooraf schriftelijk vastgelegd`, `Altijd met onafhankelijk advies`],
@@ -554,7 +554,7 @@ export default [
         h: `Overwaarde verzilveren: zet de alternatieven naast elkaar`,
         blocks: [
           { p: `Wie de overwaarde wil verzilveren, heeft vaak meer mogelijkheden dan huis verkopen en terughuren alleen. Denk aan verkopen en verhuizen naar een kleinere woning, het aanpassen van uw hypotheek of financiële producten die specifiek op oudere huiseigenaren zijn gericht. Een onafhankelijk financieel adviseur kan deze opties met u vergelijken. Windmill geeft geen hypotheek- of financieel advies.` },
-          { p: `Wilt u liever verkopen en verhuizen, lees dan meer over [een huis verkopen](/huis-verkopen/) of vraag eerst een [indicatieve waardebepaling](/vastgoed-waardebepaling/) aan. Met een overzicht van de [kosten van een huis verkopen](/kennisbank/kosten-huis-verkopen/) kunt u de opties goed vergelijken.` },
+          { p: `Wilt u liever verkopen en verhuizen, lees dan meer over [een huis verkopen](/huis-verkopen/) of vraag eerst een indicatieve waardebepaling aan. Met een overzicht van de [kosten van een huis verkopen](/kennisbank/kosten-huis-verkopen/) kunt u de opties goed vergelijken.` },
         ],
       },
     ],
@@ -640,7 +640,7 @@ export default [
         h: `De woning in de tussentijd`,
         blocks: [
           { p: `Een huis verkopen vanuit het buitenland vraagt ook om aandacht voor de woning zelf. Staat uw huis leeg zolang de verkoop loopt, regel dan dat er iemand naar omkijkt. Laat regelmatig de post weghalen en de woning ventileren, en zet de verwarming in de winter op een veilige stand. Informeer uw verzekeraar over de leegstand, want daarvoor gelden vaak aparte voorwaarden. Meer daarover leest u op onze pagina over [een leegstaande woning verkopen](/leegstaande-woning-verkopen/).` },
-          { p: `Is de woning verhuurd, dan blijft de huurder gewoon wonen en gaat het huurcontract bij verkoop over op de koper; zie [een verhuurde woning verkopen](/verhuurde-woning-verkopen/). Wilt u de woning juist aanhouden en laten beheren, dan kunt u kijken naar ons [vastgoedbeheer](/vastgoedbeheer/).` },
+          { p: `Is de woning verhuurd, dan blijft de huurder gewoon wonen en gaat het huurcontract bij verkoop over op de koper; zie [een verhuurde woning verkopen](/verhuurde-woning-verkopen/). Wilt u de woning juist aanhouden en laten beheren, dan kunt u kijken naar ons vastgoedbeheer.` },
           { callout: { t: `Wat Windmill niet doet`, d: `Windmill is koper, geen notaris, fiscalist of financieel adviseur. Vragen over de volmacht, legalisatie of apostille beantwoordt de notaris. Voor belasting in Nederland en in uw woonland verwijzen wij u naar een fiscalist met internationale ervaring.` } },
         ],
       },

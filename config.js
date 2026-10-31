@@ -13,6 +13,8 @@ export const config = {
   phone: env.PHONE || '085 000 00 00 (demo)',
   btw: env.BTW || 'NL000000000B01 (demo)',
   email: env.EMAIL || 'info@windmillinvest.nl',
+  // WhatsApp number in international format (31612345678). The WhatsApp button only shows when it is set.
+  whatsapp: (env.WHATSAPP || '').replace(/\D/g, ''),
   domain: env.DOMAIN || 'windmillinvest.nl',
   // On Render, RENDER_EXTERNAL_URL is the service's own address (https://….onrender.com).
   siteUrl: (env.SITE_URL || env.RENDER_EXTERNAL_URL || 'https://www.windmillinvest.nl').replace(/\/+$/, ''),

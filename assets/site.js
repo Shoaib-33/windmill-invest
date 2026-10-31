@@ -1,4 +1,4 @@
-// Windmill Invest: menus, cookie consent, attribution, lead forms and the yield calculator.
+// Windmill Invest: menus, cookie consent, attribution, lead forms and the scroll animations.
 // No libraries. Events go to dataLayer and never contain personal data.
 (function () {
   'use strict';
@@ -9,16 +9,34 @@
   var set = function (kind, key, val) { try { window[kind].setItem(key, val); } catch (e) { /* storage blocked */ } };
   var each = function (sel, fn, root) { Array.prototype.forEach.call((root || document).querySelectorAll(sel), fn); };
   var LANG = document.documentElement.lang === 'en' ? 'en' : 'nl';
+  var escHtml = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var M = {
     nl: {
       locale: 'nl-NL', consent: 'Ga akkoord met de privacyverklaring om door te gaan.', choose: 'Kies een optie.', required: 'Dit veld is verplicht.',
       postcode: 'Vul een geldige postcode in (bijv. 1234 AB).', email: 'Vul een geldig e-mailadres in.', phone: 'Vul een geldig telefoonnummer in, bijvoorbeeld 06 12345678.',
       phoneForContact: 'Vul uw telefoonnummer in, zodat we u kunnen bellen of een WhatsApp-bericht kunnen sturen.',
       step: 'Stap {n} van {t}', addressPick: 'Kies uw adres',
+      found: 'Wij hebben uw woning gevonden', built: 'Bouwjaar', aerial: 'Luchtfoto van uw woning en de omgeving',
+      viewPhoto: 'Luchtfoto', view3d: '3D', model3d: '3D-model van uw gebouw. Sleep om te draaien.',
+      listening: 'Luisteren… Uw browser zet uw stem om in tekst.', micOff: 'Inspreken lukt niet in deze browser.',
+      planTitle: 'Uw verkoopplan', planIntro: 'Wat er nu gebeurt en wat u alvast klaar kunt leggen.', planSteps: 'De stappen', planDocs: 'Handig om klaar te leggen', planPrint: 'Opslaan als PDF of printen',
+      planNote: 'Alles is vrijblijvend tot u de koopovereenkomst tekent. Vragen? Bel ons gerust.',
+      docs: {
+        id: 'Uw legitimatiebewijs (pas nodig bij de notaris)', mortgage: 'Gegevens van uw hypotheek: bank en leningnummer',
+        label: 'Het energielabel, als u dat heeft', vve: 'Stukken van de VvE: notulen, jaarstukken en de stand van het reservefonds',
+        heirs: 'Een verklaring van erfrecht of van executele (via de notaris)', heirsAgree: 'Het akkoord van alle erfgenamen',
+        divorce: 'Het akkoord en de handtekening van beide eigenaren', rent: 'De huurcontracten en de huidige huurprijzen',
+        abroad: 'Een volmacht voor de notaris, als u niet zelf kunt tekenen', defects: 'Een lijstje met gebreken die u kent: dat voorkomt discussie',
+        photos: 'Een paar foto’s van de woning (mag later)',
+      },
+      use: { woonfunctie: 'Woning', winkelfunctie: 'Winkel', kantoorfunctie: 'Kantoor', industriefunctie: 'Bedrijfsruimte', bijeenkomstfunctie: 'Bijeenkomstruimte', logiesfunctie: 'Logies', gezondheidszorgfunctie: 'Zorg', onderwijsfunctie: 'Onderwijs', sportfunctie: 'Sport', overige: 'Overig' },
       photosTooMany: 'Kies maximaal 5 foto’s.', photosFailed: 'Een of meer foto’s konden niet worden geopend. Kies JPG- of PNG-foto’s.',
       addressNotFound: 'We vinden dit adres niet in het adressenregister. Controleer postcode en huisnummer, of ga gewoon verder.',
       check: 'Controleer de gemarkeerde velden.', sending: 'Bezig met versturen…',
       success: 'Bedankt, uw aanvraag is ontvangen. Wij nemen contact met u op, in volgorde van binnenkomst.',
+      thanksTitle: 'Bedankt {name}, we gaan voor u aan de slag!',
+      thanksSteps: ['Aanvraag ontvangen', 'Wij bellen u om alles door te nemen', 'Eén bezichtiging, wanneer het u past', 'U ontvangt een bod op papier'],
+      thanksCallSteps: ['Verzoek ontvangen', 'Wij bellen u op het gekozen moment'],
       tooMany: 'U heeft veel aanvragen achter elkaar verstuurd. Probeer het over een paar minuten opnieuw.',
       failed: 'Er ging iets mis. Probeer het opnieuw of bel ons.', offline: 'Geen verbinding. Controleer uw internet en probeer het opnieuw.',
     },
@@ -27,10 +45,27 @@
       postcode: 'Please enter a valid Dutch postcode (e.g. 1234 AB).', email: 'Please enter a valid email address.', phone: 'Please enter a valid phone number, for example +31 6 12345678.',
       phoneForContact: 'Please enter your phone number, so we can call you or send a WhatsApp message.',
       step: 'Step {n} of {t}', addressPick: 'Choose your address',
+      found: 'We found your home', built: 'Built', aerial: 'Aerial photo of your home and its surroundings',
+      viewPhoto: 'Aerial photo', view3d: '3D', model3d: '3D model of your building. Drag to turn it.',
+      listening: 'Listening… Your browser turns your voice into text.', micOff: 'Speaking does not work in this browser.',
+      planTitle: 'Your sale plan', planIntro: 'What happens now and what you can get ready.', planSteps: 'The steps', planDocs: 'Useful to have ready', planPrint: 'Save as PDF or print',
+      planNote: 'Nothing is binding until you sign the purchase agreement. Questions? Just call us.',
+      docs: {
+        id: 'Your ID (only needed at the notary)', mortgage: 'Your mortgage details: bank and loan number',
+        label: 'The energy label, if you have one', vve: 'Owners\' association (VvE) papers: minutes, annual accounts and the reserve fund',
+        heirs: 'A certificate of inheritance or executorship (through the notary)', heirsAgree: 'The agreement of all heirs',
+        divorce: 'The agreement and signature of both owners', rent: 'The tenancy agreements and current rents',
+        abroad: 'A power of attorney for the notary, if you cannot sign yourself', defects: 'A short list of defects you know of: it prevents disputes',
+        photos: 'A few photos of the home (can wait)',
+      },
+      use: { woonfunctie: 'Home', winkelfunctie: 'Shop', kantoorfunctie: 'Office', industriefunctie: 'Commercial space', bijeenkomstfunctie: 'Meeting space', logiesfunctie: 'Lodging', gezondheidszorgfunctie: 'Care', onderwijsfunctie: 'Education', sportfunctie: 'Sport', overige: 'Other' },
       photosTooMany: 'Please choose up to 5 photos.', photosFailed: 'One or more photos could not be opened. Please choose JPG or PNG photos.',
       addressNotFound: 'We cannot find this address in the Dutch address register. Check the postcode and house number, or simply continue.',
       check: 'Please check the highlighted fields.', sending: 'Sending…',
       success: 'Thank you, we have received your request. We will contact you in order of receipt.',
+      thanksTitle: 'Thank you {name}, we are on it!',
+      thanksSteps: ['Request received', 'We call you to go through everything', 'One viewing, when it suits you', 'You receive a written offer'],
+      thanksCallSteps: ['Request received', 'We call you at the time you chose'],
       tooMany: 'You have sent several requests in a short time. Please try again in a few minutes.',
       failed: 'Something went wrong. Please try again or call us.', offline: 'No connection. Please check your internet and try again.',
     },
@@ -55,20 +90,44 @@
       b.setAttribute('aria-expanded', String(open));
     });
   });
+  var header = document.querySelector('[data-header]');
   if (toggle && nav) {
     toggle.addEventListener('click', function () {
       var open = !nav.classList.contains('open');
       nav.classList.toggle('open', open);
       toggle.setAttribute('aria-expanded', String(open));
+      if (header) header.classList.toggle('menu-open', open);
     });
+  }
+  // The header gets a background once the page scrolls (on the home page it starts transparent over the photo).
+  if (header) {
+    var onScroll = function () { header.classList.toggle('scrolled', window.scrollY > 24); };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
   }
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
     var openLi = document.querySelector('.has-menu.open');
     if (openLi) { closeMenus(); openLi.querySelector('.nav-top').focus(); return; }
-    if (nav && nav.classList.contains('open')) { nav.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); toggle.focus(); }
+    if (nav && nav.classList.contains('open')) { nav.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); if (header) header.classList.remove('menu-open'); toggle.focus(); }
   });
   document.addEventListener('click', function (e) { if (!e.target.closest('.has-menu')) closeMenus(); });
+
+  // ---------- Larger text (remembered on this device) ----------
+  var root = document.documentElement;
+  var applySize = function (on) {
+    root.classList.toggle('large-text', on);
+    each('[data-text-size]', function (b) { b.setAttribute('aria-pressed', String(on)); });
+  };
+  applySize(get('localStorage', 'text_large') === '1');
+  each('[data-text-size]', function (b) {
+    b.addEventListener('click', function () {
+      var on = !root.classList.contains('large-text');
+      applySize(on);
+      set('localStorage', 'text_large', on ? '1' : '0');
+      track('text_size', { large: on });
+    });
+  });
 
   // ---------- Attribution (first touch in this session) ----------
   var ATTR = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'gbraid', 'wbraid', 'fbclid', 'ttclid'];
@@ -194,7 +253,7 @@
       var has = function (name) { return !!root.querySelector('[name="' + name + '"]'); };
       each('[required]', function (el) {
         if (el.type === 'checkbox') { if (!el.checked) errors[el.name] = M.consent; return; }
-        if (!data[el.name]) errors[el.name] = el.tagName === 'SELECT' ? M.choose : M.required;
+        if (!data[el.name]) errors[el.name] = el.tagName === 'SELECT' || el.type === 'radio' ? M.choose : M.required;
       }, root);
       if (has('postcode') && data.postcode && !POSTCODE.test(data.postcode)) errors.postcode = M.postcode;
       if (has('email') && data.email && !EMAIL.test(data.email)) errors.email = M.email;
@@ -297,6 +356,7 @@
       Object.keys(errors).forEach(function (k) {
         setError(k, errors[k]);
         var el = form.elements[k] || (k === 'photos' ? photoInput : null);
+        if (el && !el.focus && el[0]) el = el[0]; // a group of tiles (radio buttons)
         if (!first && el && el.focus) first = el;
       });
       if (!first) return;
@@ -333,8 +393,7 @@
           if (matches.length === 1 || exact.length === 1) {
             var m = exact.length === 1 ? exact[0] : matches[0];
             addrId.value = m.id;
-            addrBox.textContent = '✓ ' + m.label;
-            addrBox.classList.add('found');
+            showHouse(m);
             return;
           }
           addrBox.innerHTML = '';
@@ -345,11 +404,168 @@
           select.id = 'f-address-pick';
           select.add(new Option(M.addressPick, ''));
           matches.forEach(function (m) { select.add(new Option(m.label, m.id)); });
-          select.addEventListener('change', function () { addrId.value = select.value; });
+          select.addEventListener('change', function () {
+            addrId.value = select.value;
+            var picked = matches.filter(function (x) { return x.id === select.value; })[0];
+            if (picked) showHouse(picked, true);
+          });
           addrBox.appendChild(label);
           addrBox.appendChild(select);
         })
         .catch(function () { addrBox.hidden = true; });
+    }
+    // "We found your home": the address, an aerial photo around it and the facts from the BAG.
+    function aerialHtml(lat, lon) {
+      if (typeof lat !== 'number' || typeof lon !== 'number') return '';
+      var z = 18, n = Math.pow(2, z);
+      var x = (lon + 180) / 360 * n;
+      var r = lat * Math.PI / 180;
+      var y = (1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n;
+      var tx = Math.floor(x), ty = Math.floor(y), tiles = '';
+      for (var j = -1; j <= 1; j++) for (var i = -1; i <= 1; i++) {
+        tiles += '<img src="/api/tile/' + z + '/' + (tx + i) + '/' + (ty + j) + '.jpg" alt="" width="256" height="256" decoding="async">';
+      }
+      var dx = (1 + x - tx) * 256, dy = (1 + y - ty) * 256;
+      return '<div class="house-map" role="img" aria-label="' + escHtml(M.aerial) + '"><div class="house-tiles" style="transform:translate(-' + dx.toFixed(1) + 'px,-' + dy.toFixed(1) + 'px)">' + tiles + '</div><span class="house-pin" aria-hidden="true"></span></div>';
+    }
+    function showHouse(m, keepPicker) {
+      var card = document.createElement('div');
+      card.className = 'house-card';
+      card.innerHTML = aerialHtml(m.lat, m.lon) + '<div class="house-info"><span class="house-found">' + escHtml(M.found) + '</span><strong>' + escHtml(m.label) + '</strong><span class="house-facts" data-facts></span></div>';
+      if (!keepPicker) { addrBox.innerHTML = ''; addrBox.className = 'address-result found'; }
+      else { var old = addrBox.querySelector('.house-card'); if (old) old.remove(); }
+      addrBox.hidden = false;
+      addrBox.appendChild(card);
+      track('address_found', { form_type: formType, page: location.pathname });
+      fetch('/api/house?id=' + encodeURIComponent(m.id))
+        .then(function (r) { return r.json(); })
+        .then(function (body) {
+          var d = body && body.details;
+          if (!d) return;
+          var facts = [];
+          if (d.build_year) facts.push(M.built + ' ' + d.build_year);
+          if (d.area_m2) facts.push(d.area_m2.toLocaleString(M.locale) + ' m²');
+          if (d.use) facts.push(M.use[d.use] || d.use);
+          card.querySelector('[data-facts]').innerHTML = facts.map(function (f) { return '<span>' + escHtml(f) + '</span>'; }).join('');
+        })
+        .catch(function () {});
+      // The building in 3D, when the 3D BAG has it; otherwise the aerial photo simply stays.
+      var mapBox = card.querySelector('.house-map');
+      if (mapBox && window.HTMLCanvasElement) {
+        fetch('/api/model?id=' + encodeURIComponent(m.id))
+          .then(function (r) { return r.json(); })
+          .then(function (body) { if (body && body.model && card.isConnected) viewer3d(mapBox, body.model); })
+          .catch(function () {});
+      }
+    }
+
+    // A small 3D viewer on a canvas: turns slowly, drag to turn it yourself. Roofs warm, walls light.
+    function viewer3d(box, model) {
+      var V = model.v, F = model.f;
+      if (!V.length || !F.length) return;
+      var canvas = document.createElement('canvas');
+      canvas.className = 'house-3d';
+      canvas.setAttribute('role', 'img');
+      canvas.setAttribute('aria-label', M.model3d);
+      box.appendChild(canvas);
+      box.classList.add('has-3d', 'show-3d');
+      var views = document.createElement('div');
+      views.className = 'house-views';
+      views.innerHTML = '<button type="button" data-view="photo" aria-pressed="false">' + escHtml(M.viewPhoto) + '</button><button type="button" data-view="3d" aria-pressed="true">' + escHtml(M.view3d) + '</button>';
+      box.appendChild(views);
+      views.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-view]');
+        if (!b) return;
+        var on = b.getAttribute('data-view') === '3d';
+        box.classList.toggle('show-3d', on);
+        each('[data-view]', function (x) { x.setAttribute('aria-pressed', String(x === b)); }, views);
+        if (on) start();
+      });
+      var ctx = canvas.getContext('2d');
+      var W = 0, H = 0;
+      var size = function () {
+        var dpr = Math.min(2, window.devicePixelRatio || 1);
+        W = box.clientWidth; H = box.clientHeight;
+        canvas.width = W * dpr; canvas.height = H * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      };
+      var R = 1, top = 0;
+      V.forEach(function (p) { R = Math.max(R, Math.sqrt(p[0] * p[0] + p[1] * p[1])); top = Math.max(top, p[2]); });
+      var reach = Math.max(R, top * 0.75);
+      // Faces should point outwards (roofs up); flip them all if the data winds the other way.
+      var normal = function (pts) {
+        var nx = 0, ny = 0, nz = 0;
+        for (var i = 0; i < pts.length; i++) {
+          var a = pts[i], b = pts[(i + 1) % pts.length];
+          nx += (a[1] - b[1]) * (a[2] + b[2]); ny += (a[2] - b[2]) * (a[0] + b[0]); nz += (a[0] - b[0]) * (a[1] + b[1]);
+        }
+        var l = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+        return [nx / l, ny / l, nz / l];
+      };
+      var up = 0;
+      F.forEach(function (f) { if (f[0] === 2) up += normal(f.slice(1).map(function (i) { return V[i]; }))[2]; });
+      var flip = up < 0 ? -1 : 1;
+      var COL = { 0: [214, 206, 192], 1: [240, 234, 222], 2: [196, 98, 58] };
+      var L = [-0.45, -0.55, 0.7], ll = Math.sqrt(L[0] * L[0] + L[1] * L[1] + L[2] * L[2]);
+      L = L.map(function (c) { return c / ll; });
+      var yaw = 0.7, pitch = 0.62, still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var dragging = false, lastX = 0, lastY = 0, idle = 0, raf = 0;
+      function draw() {
+        var ca = Math.cos(yaw), sa = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+        var s = Math.min(W, H * 1.6) * 0.34 / reach;
+        var cy = H * 0.62;
+        ctx.clearRect(0, 0, W, H);
+        // soft shadow on the ground
+        ctx.save(); ctx.translate(W / 2, cy + top * 0.0); ctx.scale(1, sp);
+        var g = ctx.createRadialGradient(0, 0, 0, 0, 0, R * s * 1.3);
+        g.addColorStop(0, 'rgba(0,0,0,.28)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, R * s * 1.3, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        var P = V.map(function (p) {
+          var x = p[0] * ca - p[1] * sa, y = p[0] * sa + p[1] * ca, z = p[2];
+          return [x, y, z, W / 2 + x * s, cy - (z * cp + y * sp) * s, y * cp - z * sp];
+        });
+        var list = [];
+        for (var k = 0; k < F.length; k++) {
+          var f = F[k];
+          if (f[0] === 0) continue;
+          var pts = [], d = 0;
+          for (var j = 1; j < f.length; j++) { pts.push(P[f[j]]); d += P[f[j]][5]; }
+          var n = normal(pts).map(function (c) { return c * flip; });
+          if (n[1] * cp - n[2] * sp > 0.02) continue; // facing away from the camera
+          var shade = 0.62 + 0.38 * Math.max(0, n[0] * L[0] + n[1] * L[1] + n[2] * L[2]);
+          list.push([d / pts.length, pts, f[0], shade]);
+        }
+        list.sort(function (a, b) { return b[0] - a[0]; });
+        list.forEach(function (it) {
+          var c = COL[it[2]];
+          var rgb = 'rgb(' + Math.round(c[0] * it[3]) + ',' + Math.round(c[1] * it[3]) + ',' + Math.round(c[2] * it[3]) + ')';
+          ctx.beginPath();
+          it[1].forEach(function (p, i) { if (i) ctx.lineTo(p[3], p[4]); else ctx.moveTo(p[3], p[4]); });
+          ctx.closePath();
+          ctx.fillStyle = rgb; ctx.fill();
+          ctx.strokeStyle = rgb; ctx.lineWidth = 0.6; ctx.stroke();
+        });
+      }
+      function frame() {
+        raf = 0;
+        if (!canvas.isConnected || !box.classList.contains('show-3d')) return;
+        if (!dragging && !still && Date.now() > idle) yaw += 0.006;
+        draw();
+        if (!still || dragging) raf = requestAnimationFrame(frame);
+      }
+      function start() { size(); if (!raf) raf = requestAnimationFrame(frame); }
+      canvas.addEventListener('pointerdown', function (e) { dragging = true; lastX = e.clientX; lastY = e.clientY; canvas.setPointerCapture(e.pointerId); start(); });
+      canvas.addEventListener('pointermove', function (e) {
+        if (!dragging) return;
+        yaw += (e.clientX - lastX) * 0.012;
+        pitch = Math.max(0.25, Math.min(1.2, pitch + (e.clientY - lastY) * 0.006));
+        lastX = e.clientX; lastY = e.clientY;
+        if (still) draw();
+      });
+      canvas.addEventListener('pointerup', function () { dragging = false; idle = Date.now() + 2500; });
+      window.addEventListener('resize', function () { if (canvas.isConnected) { size(); draw(); } });
+      start();
+      track('model_3d_shown', { page: location.pathname });
     }
     if (addrBox && addrId && form.elements.postcode && form.elements.house_number) {
       ['postcode', 'house_number'].forEach(function (n) {
@@ -392,6 +608,53 @@
         .then(function () { btn.disabled = false; btn.textContent = label; });
     });
 
+    // After sending: a check mark that draws itself and what happens next, step by step.
+    function thanks(data) {
+      var first = String(data.name || '').split(' ')[0];
+      var callback = form.hasAttribute('data-callback');
+      var steps = callback ? M.thanksCallSteps : M.thanksSteps;
+      var box = document.createElement('div');
+      box.className = 'thanks';
+      box.innerHTML = '<svg class="thanks-check" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg>' +
+        '<p class="thanks-title">' + escHtml(M.thanksTitle.replace('{name}', first)) + '</p>' +
+        '<ol class="thanks-steps">' + steps.map(function (s, i) { return '<li class="' + (i === 0 ? 'done' : '') + '" style="--i:' + i + '"><span></span>' + escHtml(s) + '</li>'; }).join('') + '</ol>';
+      if (!callback) box.appendChild(salePlan(data));
+      status.parentNode.insertBefore(box, status);
+    }
+
+    // "Uw verkoopplan": the next steps and the papers that help, chosen by what the seller told us.
+    function salePlan(data) {
+      var D = M.docs, page = data.page || location.pathname, docs = [];
+      var heirs = data.situation === 'geerfd' || /erf/.test(page);
+      var divorce = data.situation === 'scheiding' || /scheiding/.test(page);
+      var rented = data.occupancy === 'verhuurd' || /verhuur|beleggingspand|portefeuille|bedrijfspand/.test(page) || data.form_type === 'verhuurd' || data.form_type === 'commercieel' || data.form_type === 'funnel_portfolio';
+      if (heirs) docs.push(D.heirs, D.heirsAgree);
+      if (divorce) docs.push(D.divorce);
+      if (rented) docs.push(D.rent);
+      if (data.situation === 'buitenland' || /buitenland/.test(page)) docs.push(D.abroad);
+      if (data.property_type === 'appartement') docs.push(D.vve);
+      if (data.mortgage !== 'nee') docs.push(D.mortgage);
+      if (data.situation === 'onderhoud' || data.form_type === 'funnel_asis' || /onderhoud|zoals/.test(page)) docs.push(D.defects);
+      docs.push(D.label, D.photos, D.id);
+      var el = document.createElement('section');
+      el.className = 'plan';
+      el.innerHTML = '<h3>' + escHtml(M.planTitle) + '</h3><p class="plan-intro">' + escHtml(M.planIntro) + '</p>' +
+        '<h4>' + escHtml(M.planDocs) + '</h4><ul class="plan-docs">' + docs.map(function (d) { return '<li><span class="plan-box" aria-hidden="true"></span>' + escHtml(d) + '</li>'; }).join('') + '</ul>' +
+        '<p class="plan-note">' + escHtml(M.planNote) + '</p><button type="button" class="btn btn-plain plan-print">' + escHtml(M.planPrint) + '</button>';
+      el.querySelector('.plan-print').addEventListener('click', function () {
+        var sheet = document.createElement('div');
+        sheet.className = 'print-sheet';
+        sheet.innerHTML = '<p class="print-brand">Windmill Invest</p>' + el.innerHTML.replace(/<button[\s\S]*<\/button>/, '') + '<h4>' + escHtml(M.planSteps) + '</h4><ol>' + M.thanksSteps.map(function (s) { return '<li>' + escHtml(s) + '</li>'; }).join('') + '</ol><p class="print-date">' + new Date().toLocaleDateString(M.locale) + '</p>';
+        document.body.appendChild(sheet);
+        document.body.classList.add('print-plan');
+        var done = function () { document.body.classList.remove('print-plan'); sheet.remove(); window.removeEventListener('afterprint', done); };
+        window.addEventListener('afterprint', done);
+        track('sale_plan_print', { page: location.pathname });
+        window.print();
+      });
+      return el;
+    }
+
     function sendInquiry(data) {
       return fetch('/api/inquiry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
         .then(function (res) { return res.json().catch(function () { return {}; }).then(function (body) { return { res: res, body: body }; }); })
@@ -402,6 +665,7 @@
             newLeadId();
             form.classList.add('sent');
             say(M.success, 'ok');
+            thanks(data);
             status.setAttribute('tabindex', '-1');
             status.focus();
             return;
@@ -411,40 +675,6 @@
         })
         .catch(function () { say(M.offline, 'err'); });
     }
-  });
-
-  // ---------- Yield calculator (BAR / NAR) ----------
-  each('[data-calculator]', function (calc) {
-    var val = function (name) {
-      var el = calc.querySelector('[name="' + name + '"]');
-      var n = parseFloat(String(el.value).replace(',', '.'));
-      return isFinite(n) && n >= 0 ? n : NaN;
-    };
-    var euro = function (n) { return (LANG === 'en' ? '€' : '€ ') + Math.round(n).toLocaleString(M.locale); };
-    var pct = function (n) { return n.toLocaleString(M.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%'; };
-    var out = function (k, v) { calc.querySelector('[data-out="' + k + '"]').textContent = v; };
-    var run = function () {
-      var price = val('price'), tax = val('tax') / 100, other = val('other'), rent = val('rent'), costs = val('costs');
-      var vacancy = Math.min(val('vacancy') || 0, 100) / 100;
-      if (!(price > 0) || isNaN(tax) || isNaN(other) || isNaN(rent) || isNaN(costs)) {
-        ['bar', 'nar', 'kk', 'total', 'gross', 'net'].forEach(function (k) { out(k, '–'); });
-        return;
-      }
-      // BAR and NAR over the total investment (price plus buyer's costs).
-      var kk = price * tax + other;
-      var total = price + kk;
-      var gross = rent * 12;
-      var net = gross * (1 - vacancy) - costs;
-      out('gross', euro(gross));
-      out('net', euro(net));
-      out('kk', euro(kk));
-      out('total', euro(total));
-      out('bar', pct((gross / total) * 100));
-      out('nar', pct((net / total) * 100));
-    };
-    calc.addEventListener('input', run);
-    calc.addEventListener('change', run);
-    run();
   });
 
   // Count language switches, so the team can see how many visitors prefer the other language.
@@ -459,6 +689,183 @@
     }
     a.addEventListener('click', function () { track('language_switch', { from: LANG, to: a.getAttribute('hreflang'), page: location.pathname }); });
   });
+
+  // ---------- Scroll animations: elements with .reveal fade in when they reach the screen ----------
+  var revealed = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    Array.prototype.forEach.call(revealed, function (el) { io.observe(el); });
+  } else {
+    Array.prototype.forEach.call(revealed, function (el) { el.classList.add('in'); });
+  }
+
+  // ---------- Quick start in the home hero: postcode + house number fill in the form's first step ----------
+  each('[data-quick]', function (quick) {
+    quick.addEventListener('submit', function (e) {
+      var form = document.querySelector('[data-lead-form]:not([data-callback]):not([data-drawer])');
+      if (!form || !form.elements.postcode) return; // without a form, the browser follows action="#formulier"
+      e.preventDefault();
+      var pc = quick.elements.q_postcode.value.trim();
+      var nr = quick.elements.q_number.value.trim();
+      track('quick_start', { page: location.pathname, has_address: !!(pc && nr) });
+      form.elements.postcode.value = pc;
+      form.elements.house_number.value = nr;
+      ['postcode', 'house_number'].forEach(function (n) { form.elements[n].dispatchEvent(new Event('input', { bubbles: true })); });
+      form.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      // Step 1 now shows their home (address, aerial photo, facts); the Next button is ready for them.
+      var next = form.querySelector('.form-step:not([hidden]) [data-step-next]');
+      setTimeout(function () {
+        var target = pc && nr ? next || form.elements.house_number : pc ? form.elements.house_number : form.elements.postcode;
+        if (target) target.focus({ preventScroll: true });
+      }, 700);
+    });
+  });
+
+  // ---------- Mobile action bar: out of the way while a form (or the hero quick start) is on screen ----------
+  var bar = document.querySelector('[data-mobile-bar]');
+  var forms = Array.prototype.slice.call(document.querySelectorAll('[data-lead-form]:not([data-callback]):not([data-drawer]), [data-quick]'));
+  if (bar && forms.length && 'IntersectionObserver' in window) {
+    var onScreen = new Set();
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) onScreen.add(en.target); else onScreen.delete(en.target); });
+      bar.classList.toggle('away', onScreen.size > 0);
+    }, { threshold: 0.05 });
+    forms.forEach(function (f) { obs.observe(f); });
+  }
+
+  // ---------- Speak instead of type (browsers with speech recognition: Chrome, Edge, Safari) ----------
+  var Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (Speech) {
+    each('[data-mic]', function (mic) {
+      var area = mic.parentNode.querySelector('textarea');
+      var rec = null;
+      mic.hidden = false;
+      var stop = function () { if (rec) rec.stop(); };
+      mic.addEventListener('click', function () {
+        if (rec) { stop(); return; }
+        rec = new Speech();
+        rec.lang = LANG === 'en' ? 'en-GB' : 'nl-NL';
+        rec.interimResults = false;
+        rec.continuous = true;
+        var before = area.value;
+        var said = '';
+        rec.onresult = function (e) {
+          for (var i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) said += (said ? ' ' : '') + e.results[i][0].transcript.trim();
+          area.value = (before ? before.replace(/\s*$/, ' ') : '') + said;
+          area.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+        rec.onend = function () { rec = null; mic.classList.remove('on'); mic.setAttribute('aria-pressed', 'false'); area.placeholder = ''; };
+        rec.onerror = function () { area.placeholder = M.micOff; };
+        try {
+          rec.start();
+          mic.classList.add('on');
+          mic.setAttribute('aria-pressed', 'true');
+          area.placeholder = M.listening;
+          track('voice_input', { page: location.pathname });
+        } catch (e) { rec = null; }
+      });
+    });
+  }
+
+  // ---------- Scroll story: "Zo werkt het" follows the step in view ----------
+  each('[data-story]', function (story) {
+    var stage = story.querySelector('[data-story-stage]');
+    var cards = story.querySelectorAll('[data-story-step]');
+    if (!stage || !cards.length || !('IntersectionObserver' in window)) return;
+    var cap = story.querySelector('[data-story-caption]');
+    var num = story.querySelector('[data-story-num]');
+    var show = function (i) {
+      stage.style.setProperty('--step', i + 1);
+      each('[data-story-icon]', function (ic) { ic.classList.toggle('on', Number(ic.getAttribute('data-story-icon')) === i); }, stage);
+      each('[data-story-step]', function (c) { c.classList.toggle('active', Number(c.getAttribute('data-story-step')) === i); }, story);
+      var tpl = story.querySelector('[data-story-text="' + i + '"]');
+      if (cap && tpl) cap.innerHTML = tpl.innerHTML;
+      if (num) num.textContent = String(i + 1).padStart(2, '0');
+    };
+    show(0);
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) show(Number(en.target.getAttribute('data-story-step'))); });
+    }, { rootMargin: '-45% 0px -45% 0px' });
+    Array.prototype.forEach.call(cards, function (c) { io.observe(c); });
+  });
+
+  // ---------- Offer form sliding in from the side (header button) ----------
+  var drawer = document.querySelector('[data-offer-drawer]');
+  if (drawer && typeof drawer.showModal === 'function') {
+    each('[data-offer-open]', function (b) {
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (nav && nav.classList.contains('open')) toggle.click();
+        drawer.showModal();
+        var first = drawer.querySelector('.form-step:not([hidden]) input:not([type=hidden]), .form-step:not([hidden]) select');
+        if (first) first.focus();
+        track('offer_drawer_open', { page: location.pathname });
+      });
+    });
+    drawer.addEventListener('click', function (e) {
+      if (e.target === drawer || e.target.closest('[data-drawer-close]')) drawer.close();
+      // The call-back link inside the drawer: swap to the call-back dialog.
+      if (e.target.closest('[data-callback-open]')) drawer.close();
+    });
+  }
+
+  // ---------- Letter page: the code from the letter becomes the lead's campaign data ----------
+  var letter = document.querySelector('[data-letter-code]');
+  if (letter) {
+    var setLetter = function (code) {
+      attribution.utm_source = 'brief';
+      attribution.utm_medium = 'direct_mail';
+      if (code) attribution.utm_content = code.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20);
+      else delete attribution.utm_content;
+      set('sessionStorage', 'attribution_v1', JSON.stringify(attribution));
+    };
+    var fromUrl = new URLSearchParams(location.search).get('code');
+    if (fromUrl) letter.value = fromUrl.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20);
+    setLetter(letter.value);
+    letter.addEventListener('input', function () { setLetter(letter.value.trim()); });
+  }
+
+  // ---------- Explainer video: loads and plays only when asked ----------
+  var vd = document.querySelector('[data-video-dialog]');
+  if (vd && typeof vd.showModal === 'function') {
+    var video = vd.querySelector('video');
+    each('[data-video-open]', function (b) {
+      b.addEventListener('click', function () {
+        if (!video.src) video.src = video.getAttribute('data-src');
+        vd.showModal();
+        var playing = video.play();
+        if (playing && playing.catch) playing.catch(function () {});
+        track('video_open', { page: location.pathname });
+      });
+    });
+    var closeVideo = function () { video.pause(); };
+    vd.addEventListener('close', closeVideo);
+    vd.addEventListener('click', function (e) { if (e.target === vd || e.target.closest('[data-video-close]')) vd.close(); });
+    video.addEventListener('ended', function () { track('video_complete', { page: location.pathname }); });
+  } else {
+    each('[data-video-open]', function (b) { b.hidden = true; });
+  }
+
+  // ---------- "Bel mij terug" dialog ----------
+  var dialog = document.querySelector('[data-callback-dialog]');
+  if (dialog && typeof dialog.showModal === 'function') {
+    each('[data-callback-open]', function (b) {
+      b.addEventListener('click', function () {
+        dialog.showModal();
+        var first = dialog.querySelector('input:not([type=hidden]):not([tabindex="-1"])');
+        if (first) first.focus();
+        track('callback_open', { page: location.pathname });
+      });
+    });
+    dialog.addEventListener('click', function (e) {
+      if (e.target === dialog || e.target.closest('[data-callback-close]')) dialog.close();
+    });
+  } else {
+    // Old browsers without <dialog>: the buttons call instead.
+    each('[data-callback-open]', function (b) { b.hidden = true; });
+  }
 
   if (SITE.template === 'article') track('article_view', { page: location.pathname, language: LANG });
 })();

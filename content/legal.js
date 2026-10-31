@@ -391,7 +391,7 @@ export default [
         h: `Artikel 5. Indicatieve waardebeoordelingen en analyses`,
         blocks: [
           { p: `5.1 Een indicatieve waardebeoordeling, rendementsindicatie, haalbaarheidsverkenning of andere analyse van Windmill Invest is een globale inschatting op basis van de beschikbare informatie. Zij is geen taxatie en geen gevalideerd taxatierapport van een register-taxateur.` },
-          { p: `5.2 Een indicatieve waardebeoordeling is niet bedoeld en niet geschikt voor de aanvraag van een hypotheek of andere financiering, voor fiscale doeleinden of voor andere doeleinden waarvoor een taxatierapport is vereist. Hebt u een officiële waardering nodig, dan kunt u een register-taxateur inschakelen. Meer hierover leest u op onze pagina over [vastgoed waardebepaling](/vastgoed-waardebepaling/).` },
+          { p: `5.2 Een indicatieve waardebeoordeling is niet bedoeld en niet geschikt voor de aanvraag van een hypotheek of andere financiering, voor fiscale doeleinden of voor andere doeleinden waarvoor een taxatierapport is vereist. Hebt u een officiële waardering nodig, dan kunt u een register-taxateur inschakelen. Meer hierover leest u op onze pagina over vastgoed waardebepaling.` },
           { p: `5.3 Analyses en indicaties zijn geen juridisch, fiscaal of financieel advies en geen beleggingsadvies. U blijft zelf verantwoordelijk voor uw beslissingen. Wij raden u aan bij belangrijke beslissingen onafhankelijk advies in te winnen.` },
           { p: `5.4 Aan een indicatieve waardebeoordeling of analyse kunt u geen recht ontlenen op een bepaalde prijs, een bepaald rendement, een bepaalde termijn of een ander resultaat.` },
         ],

@@ -1,0 +1,345 @@
+<!doctype html>
+<!-- Windmill Invest explainer (about 30 s). Open in a browser to watch; video/record.mjs renders it to MP4
+     frame by frame through renderAt(t). ?lang=nl|en  ?format=wide (1920×1080) | tall (1080×1920) -->
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Windmill Invest – zo werkt het</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@500;600;700&display=block">
+<style>
+  :root { --brand: #0B3D35; --ink: #12201C; --mint: #8FDDBD; --mint-soft: #E2F3EB; --cream: #F7F5F0; --sand: #EFEADF; --action: #C2410C; --roof: #C4623A; --muted: #55625E; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #0a0f0e; }
+  body { display: grid; place-items: center; overflow: hidden; }
+  #stage { position: relative; width: 1920px; height: 1080px; background: var(--cream); overflow: hidden; font-family: Inter, sans-serif; color: var(--ink); transform-origin: center; }
+  body.tall #stage { width: 1080px; height: 1920px; }
+  .bg-blob { position: absolute; border-radius: 50%; filter: blur(2px); }
+  #brand { position: absolute; left: 96px; top: 72px; display: flex; align-items: center; gap: 16px; font: 800 38px/1 'Bricolage Grotesque', sans-serif; color: var(--brand); letter-spacing: -0.02em; }
+  body.tall #brand { left: 50%; transform: translateX(-50%); top: 96px; }
+  #brand svg { width: 52px; height: 52px; }
+  #captions { position: absolute; left: 120px; top: 50%; width: 760px; transform: translateY(-50%); }
+  body.tall #captions { left: 90px; right: 90px; width: auto; top: auto; bottom: 230px; transform: none; text-align: center; }
+  .cap { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); opacity: 0; }
+  body.tall .cap { top: auto; bottom: 0; transform: none; }
+  .cap .num { display: inline-block; font: 700 28px/1 Inter, sans-serif; color: var(--action); letter-spacing: .08em; margin-bottom: 24px; }
+  .cap h1 { margin: 0 0 22px; font: 800 92px/1.02 'Bricolage Grotesque', sans-serif; letter-spacing: -0.035em; color: var(--brand); }
+  body.tall .cap h1 { font-size: 96px; }
+  .cap p { margin: 0; font: 600 40px/1.3 Inter, sans-serif; color: var(--muted); }
+  #art { position: absolute; right: 80px; top: 40px; width: 1000px; height: 1000px; }
+  body.tall #art { right: 40px; left: 40px; top: 240px; width: 1000px; }
+  #bar { position: absolute; left: 0; bottom: 0; height: 12px; width: 100%; background: var(--sand); }
+  #bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--brand), var(--mint)); }
+  svg text { font-family: Inter, sans-serif; }
+  .d { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="bg-blob" id="blob1" style="width:900px;height:900px;background:#E2F3EB;right:-120px;top:-120px"></div>
+  <div class="bg-blob" id="blob2" style="width:380px;height:380px;background:#F3E3D6;left:-120px;bottom:-140px"></div>
+  <div id="brand"><svg viewBox="0 0 40 40"><g id="brandMill" transform="rotate(18 20 20)" fill="#0B3D35"><path d="M18.6 18 L16 3.5 L22 3 L21.4 18Z"/><path d="M22 18.6 L36.5 16 L37 22 L22 21.4Z"/><path d="M21.4 22 L24 36.5 L18 37 L18.6 22Z"/><path d="M18 21.4 L3.5 24 L3 18 L18 18.6Z"/></g><circle cx="20" cy="20" r="4" fill="#C2410C"/></svg>Windmill Invest</div>
+  <div id="captions"></div>
+  <svg id="art" viewBox="0 0 1000 1000">
+    <defs>
+      <filter id="sh" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#0B3D35" flood-opacity=".18"/></filter>
+      <clipPath id="screenClip"><rect x="352" y="196" width="296" height="640" rx="30"/></clipPath>
+    </defs>
+
+    <!-- 1. The house -->
+    <g id="s1">
+      <ellipse cx="500" cy="815" rx="330" ry="34" fill="#0B3D35" opacity=".08"/>
+      <line id="ground" x1="150" y1="800" x2="850" y2="800" stroke="#0B3D35" stroke-width="8" stroke-linecap="round" stroke-dasharray="700" stroke-dashoffset="700"/>
+      <g id="walls"><rect x="300" y="470" width="400" height="330" rx="6" fill="#F0E4D2" stroke="#0B3D35" stroke-width="8"/>
+        <rect x="300" y="470" width="400" height="330" rx="6" fill="url(#none)"/></g>
+      <g id="roof"><polygon points="260,486 500,270 740,486" fill="#C4623A" stroke="#0B3D35" stroke-width="8" stroke-linejoin="round"/><rect x="590" y="300" width="44" height="90" fill="#C4623A" stroke="#0B3D35" stroke-width="8"/></g>
+      <g id="win1"><rect x="345" y="540" width="100" height="90" rx="6" fill="#BFE3EF" stroke="#0B3D35" stroke-width="7"/><line x1="395" y1="540" x2="395" y2="630" stroke="#0B3D35" stroke-width="5"/></g>
+      <g id="win2"><rect x="555" y="540" width="100" height="90" rx="6" fill="#BFE3EF" stroke="#0B3D35" stroke-width="7"/><line x1="605" y1="540" x2="605" y2="630" stroke="#0B3D35" stroke-width="5"/></g>
+      <g id="door"><rect x="460" y="660" width="80" height="140" rx="8" fill="#0B3D35"/><circle cx="522" cy="735" r="6" fill="#8FDDBD"/></g>
+      <g id="sign"><line x1="800" y1="800" x2="800" y2="620" stroke="#0B3D35" stroke-width="8" stroke-linecap="round"/>
+        <g id="board"><rect x="720" y="560" width="190" height="86" rx="10" fill="#C2410C"/><text id="t-sale" x="815" y="615" text-anchor="middle" font-size="34" font-weight="800" fill="#fff"></text></g></g>
+    </g>
+
+    <!-- 2. The phone and the form -->
+    <g id="s2">
+      <rect x="330" y="160" width="340" height="710" rx="52" fill="#12201C" filter="url(#sh)"/>
+      <rect x="352" y="196" width="296" height="640" rx="30" fill="#F7F5F0"/>
+      <g clip-path="url(#screenClip)">
+        <text id="t-addr" x="378" y="250" font-size="22" font-weight="700" fill="#0B3D35"></text>
+        <rect x="378" y="268" width="150" height="54" rx="12" fill="#fff" stroke="#C7C0B2" stroke-width="2"/>
+        <text id="typePc" x="392" y="303" font-size="22" font-weight="600" fill="#12201C"></text>
+        <rect x="538" y="268" width="84" height="54" rx="12" fill="#fff" stroke="#C7C0B2" stroke-width="2"/>
+        <text id="typeNr" x="552" y="303" font-size="22" font-weight="600" fill="#12201C"></text>
+        <g id="found">
+          <rect x="378" y="340" width="244" height="230" rx="18" fill="#fff" stroke="#E3DED3" stroke-width="2"/>
+          <rect x="378" y="340" width="244" height="150" rx="18" fill="#CFE0DA"/>
+          <rect x="378" y="470" width="244" height="20" fill="#CFE0DA"/>
+          <g id="iso3d">
+            <polygon points="500,388 556,418 500,448 444,418" fill="#C4623A"/>
+            <polygon points="444,418 500,448 500,476 444,446" fill="#EDE5D7"/>
+            <polygon points="500,448 556,418 556,446 500,476" fill="#D6CCBB"/>
+            <polygon points="444,418 500,388 500,372 444,402" fill="#B5542E" opacity=".0"/>
+          </g>
+          <circle cx="398" cy="512" r="7" fill="#17784A"/>
+          <text id="t-found" x="412" y="519" font-size="17" font-weight="700" fill="#17784A"></text>
+          <rect x="392" y="534" width="90" height="24" rx="12" fill="#E2F3EB"/><text id="t-year" x="437" y="551" text-anchor="middle" font-size="14" font-weight="700" fill="#0E6455"></text>
+          <rect x="490" y="534" width="70" height="24" rx="12" fill="#E2F3EB"/><text x="525" y="551" text-anchor="middle" font-size="14" font-weight="700" fill="#0E6455">120 m²</text>
+        </g>
+        <g id="tiles">
+          <g id="tile1"><rect x="378" y="590" width="244" height="56" rx="14" fill="#fff" stroke="#E3DED3" stroke-width="2"/><text id="t-tile1" x="398" y="625" font-size="19" font-weight="600" fill="#12201C"></text><circle class="tick" cx="598" cy="618" r="12" fill="#0E6455" opacity="0"/><path class="tick" d="M592 618l4 4 8-8" stroke="#fff" stroke-width="3" fill="none" opacity="0"/></g>
+          <g id="tile2"><rect x="378" y="656" width="244" height="56" rx="14" fill="#fff" stroke="#E3DED3" stroke-width="2"/><text id="t-tile2" x="398" y="691" font-size="19" font-weight="600" fill="#12201C"></text><circle class="tick" cx="598" cy="684" r="12" fill="#0E6455" opacity="0"/><path class="tick" d="M592 684l4 4 8-8" stroke="#fff" stroke-width="3" fill="none" opacity="0"/></g>
+          <g id="tile3"><rect x="378" y="722" width="244" height="56" rx="14" fill="#fff" stroke="#E3DED3" stroke-width="2"/><text id="t-tile3" x="398" y="757" font-size="19" font-weight="600" fill="#12201C"></text><circle class="tick" cx="598" cy="750" r="12" fill="#0E6455" opacity="0"/><path class="tick" d="M592 750l4 4 8-8" stroke="#fff" stroke-width="3" fill="none" opacity="0"/></g>
+        </g>
+        <rect id="sendBtn" x="378" y="790" width="244" height="0" rx="14" fill="#C2410C"/>
+      </g>
+      <g id="finger"><circle cx="0" cy="0" r="26" fill="#C2410C" opacity=".25"/><circle cx="0" cy="0" r="12" fill="#C2410C"/></g>
+    </g>
+
+    <!-- 3. The viewing -->
+    <g id="s3">
+      <ellipse cx="420" cy="760" rx="260" ry="40" fill="#0B3D35" opacity=".08"/>
+      <g id="isoBig">
+        <polygon points="420,330 640,450 420,570 200,450" fill="#C4623A" stroke="#0B3D35" stroke-width="7" stroke-linejoin="round"/>
+        <polygon points="200,450 420,570 420,760 200,640" fill="#F0E4D2" stroke="#0B3D35" stroke-width="7" stroke-linejoin="round"/>
+        <polygon points="420,570 640,450 640,640 420,760" fill="#E0D2BC" stroke="#0B3D35" stroke-width="7" stroke-linejoin="round"/>
+        <polygon points="250,520 300,547 300,600 250,573" fill="#BFE3EF" stroke="#0B3D35" stroke-width="5"/>
+        <polygon points="330,563 380,590 380,643 330,616" fill="#BFE3EF" stroke="#0B3D35" stroke-width="5"/>
+        <polygon points="470,600 520,573 520,690 470,717" fill="#0B3D35"/>
+        <polygon points="560,552 600,530 600,580 560,602" fill="#BFE3EF" stroke="#0B3D35" stroke-width="5"/>
+      </g>
+      <g id="glass"><circle cx="0" cy="0" r="78" fill="#fff" fill-opacity=".35" stroke="#0B3D35" stroke-width="14"/><line x1="56" y1="56" x2="120" y2="120" stroke="#0B3D35" stroke-width="22" stroke-linecap="round"/></g>
+      <g id="cal" filter="url(#sh)">
+        <rect x="640" y="250" width="270" height="270" rx="26" fill="#fff"/>
+        <rect x="640" y="250" width="270" height="70" rx="26" fill="#0B3D35"/><rect x="640" y="290" width="270" height="30" fill="#0B3D35"/>
+        <text id="t-month" x="775" y="296" text-anchor="middle" font-size="26" font-weight="700" fill="#fff"></text>
+        <g fill="#D9D3C6" id="calDots"></g>
+        <circle id="calRing" cx="800" cy="440" r="26" fill="none" stroke="#C2410C" stroke-width="6" stroke-dasharray="164" stroke-dashoffset="164"/>
+      </g>
+    </g>
+
+    <!-- 4. The offer on paper -->
+    <g id="s4">
+      <g id="doc" filter="url(#sh)">
+        <rect x="270" y="150" width="460" height="640" rx="22" fill="#fff"/>
+        <rect x="270" y="150" width="460" height="16" rx="8" fill="#0B3D35"/>
+        <text id="t-offer" x="320" y="250" font-size="40" class="d" fill="#0B3D35"></text>
+        <rect class="ln" x="320" y="290" width="360" height="14" rx="7" fill="#E3DED3"/>
+        <rect class="ln" x="320" y="320" width="300" height="14" rx="7" fill="#E3DED3"/>
+        <rect id="hl" x="306" y="372" width="0" height="64" rx="12" fill="#E2F3EB"/>
+        <text id="t-price" x="320" y="414" font-size="26" font-weight="700" fill="#0B3D35"></text>
+        <rect x="560" y="396" width="120" height="18" rx="9" fill="#0B3D35" opacity=".85"/>
+        <rect class="ln" x="320" y="470" width="360" height="14" rx="7" fill="#E3DED3"/>
+        <rect class="ln" x="320" y="500" width="330" height="14" rx="7" fill="#E3DED3"/>
+        <rect class="ln" x="320" y="530" width="250" height="14" rx="7" fill="#E3DED3"/>
+        <line x1="320" y1="700" x2="560" y2="700" stroke="#C7C0B2" stroke-width="3"/>
+        <path id="sig" d="M330 680 C 360 610, 380 700, 405 660 S 440 620, 455 672 S 500 640, 520 668 S 545 690, 560 650" stroke="#0B3D35" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="420" stroke-dashoffset="420"/>
+      </g>
+      <g id="pen"><rect x="-10" y="-150" width="20" height="130" rx="6" fill="#C2410C" transform="rotate(30)"/><polygon points="-10,-20 10,-20 0,6" fill="#0B3D35" transform="rotate(30)"/></g>
+      <g id="free"><rect x="600" y="720" width="250" height="70" rx="35" fill="#0B3D35"/><text id="t-free" x="725" y="765" text-anchor="middle" font-size="24" font-weight="700" fill="#fff"></text></g>
+    </g>
+
+    <!-- 5. The notary -->
+    <g id="s5">
+      <g id="bank">
+        <polygon points="230,330 500,200 770,330" fill="#0B3D35"/>
+        <rect x="250" y="330" width="500" height="34" fill="#135A4D"/>
+        <rect x="290" y="380" width="44" height="260" rx="6" fill="#F0E4D2" stroke="#0B3D35" stroke-width="6"/>
+        <rect x="400" y="380" width="44" height="260" rx="6" fill="#F0E4D2" stroke="#0B3D35" stroke-width="6"/>
+        <rect x="556" y="380" width="44" height="260" rx="6" fill="#F0E4D2" stroke="#0B3D35" stroke-width="6"/>
+        <rect x="666" y="380" width="44" height="260" rx="6" fill="#F0E4D2" stroke="#0B3D35" stroke-width="6"/>
+        <rect x="230" y="640" width="540" height="40" rx="6" fill="#0B3D35"/>
+        <text id="t-notary" x="500" y="296" text-anchor="middle" font-size="34" font-weight="800" fill="#fff" letter-spacing="4"></text>
+      </g>
+      <g id="key"><circle cx="0" cy="0" r="34" fill="none" stroke="#C2410C" stroke-width="14"/><rect x="28" y="-8" width="110" height="16" rx="8" fill="#C2410C"/><rect x="104" y="0" width="14" height="30" rx="4" fill="#C2410C"/><rect x="124" y="0" width="14" height="22" rx="4" fill="#C2410C"/></g>
+      <g id="paid"><rect x="280" y="740" width="440" height="84" rx="42" fill="#17784A"/><circle cx="330" cy="782" r="22" fill="#fff"/><path d="M319 782l8 8 15-16" stroke="#17784A" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text id="t-paid" x="368" y="792" font-size="28" font-weight="700" fill="#fff"></text></g>
+    </g>
+
+    <!-- 6. Outro -->
+    <g id="s6">
+      <g id="bigMill" transform="translate(500 400)"><g id="bigBlades"><g transform="rotate(18) translate(-200 -200) scale(10)" fill="#0B3D35"><path d="M18.6 18 L16 3.5 L22 3 L21.4 18Z"/><path d="M22 18.6 L36.5 16 L37 22 L22 21.4Z"/><path d="M21.4 22 L24 36.5 L18 37 L18.6 22Z"/><path d="M18 21.4 L3.5 24 L3 18 L18 18.6Z"/></g></g><circle r="40" fill="#C2410C"/></g>
+      <g id="cta"><rect x="230" y="700" width="540" height="96" rx="48" fill="#C2410C"/><text id="t-cta" x="500" y="760" text-anchor="middle" font-size="32" font-weight="700" fill="#fff"></text></g>
+      <text id="t-brand" x="500" y="640" text-anchor="middle" font-size="64" class="d" fill="#0B3D35" letter-spacing="-1">Windmill Invest</text>
+      <text id="t-url" x="500" y="870" text-anchor="middle" font-size="34" font-weight="700" fill="#0B3D35">windmillinvest.nl</text>
+    </g>
+  </svg>
+  <div id="bar"><i id="prog"></i></div>
+</div>
+
+<script>
+const q = new URLSearchParams(location.search);
+const LANG = q.get('lang') === 'en' ? 'en' : 'nl';
+const TALL = q.get('format') === 'tall';
+if (TALL) document.body.classList.add('tall');
+document.documentElement.lang = LANG;
+const T = {
+  nl: {
+    caps: [
+      ['', 'Wilt u uw huis verkopen?', 'Zonder makelaar, zonder gedoe.'],
+      ['01', 'Vertel over uw woning', 'Online, in twee minuten. Wij vinden uw woning direct.'],
+      ['02', 'Eén bezichtiging', 'Op een moment dat u past.'],
+      ['03', 'U ontvangt een bod op papier', 'Met alle voorwaarden. U beslist zelf.'],
+      ['04', 'De notaris regelt de rest', 'Veilige betaling, op de afgesproken datum.'],
+      ['', 'Vraag vrijblijvend een bod aan', 'Rechtstreeks verkopen aan Windmill Invest.'],
+    ],
+    sale: 'TE KOOP', addr: 'Uw adres', found: 'Woning gevonden', year: '1931', tiles: ['Woning', 'Erfenis', 'Binnen 3 maanden'],
+    month: 'Mei', offer: 'Bod', price: 'Koopsom', free: 'Vrijblijvend', notary: 'NOTARIS', paid: 'Betaald via de notaris', cta: 'Vraag een bod aan',
+  },
+  en: {
+    caps: [
+      ['', 'Want to sell your house?', 'No estate agent, no hassle.'],
+      ['01', 'Tell us about your home', 'Online, in two minutes. We find your home straight away.'],
+      ['02', 'One viewing', 'At a time that suits you.'],
+      ['03', 'You receive a written offer', 'With all the terms. You decide.'],
+      ['04', 'The notary does the rest', 'Safe payment, on the agreed date.'],
+      ['', 'Request a free offer', 'Sell directly to Windmill Invest.'],
+    ],
+    sale: 'FOR SALE', addr: 'Your address', found: 'Home found', year: '1931', tiles: ['House', 'Inheritance', 'Within 3 months'],
+    month: 'May', offer: 'Offer', price: 'Purchase price', free: 'No obligation', notary: 'NOTARY', paid: 'Paid via the notary', cta: 'Request an offer',
+  },
+}[LANG];
+
+// Captions
+const capBox = document.getElementById('captions');
+T.caps.forEach(([n, h, p], i) => {
+  const d = document.createElement('div');
+  d.className = 'cap'; d.id = 'cap' + i;
+  d.innerHTML = (n ? `<span class="num">${n} / 04</span>` : '') + `<h1>${h}</h1><p>${p}</p>`;
+  capBox.appendChild(d);
+});
+const $ = (id) => document.getElementById(id);
+const txt = { 't-sale': T.sale, 't-addr': T.addr, 't-found': T.found, 't-year': T.year, 't-tile1': T.tiles[0], 't-tile2': T.tiles[1], 't-tile3': T.tiles[2], 't-month': T.month, 't-offer': T.offer, 't-price': T.price, 't-free': T.free, 't-notary': T.notary, 't-paid': T.paid, 't-cta': T.cta };
+for (const k in txt) $(k).textContent = txt[k];
+// calendar dots
+let dots = '';
+for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) dots += `<circle cx="${680 + c * 48}" cy="${360 + r * 40}" r="9"/>`;
+$('calDots').innerHTML = dots;
+
+// ---- timeline helpers ----
+const DURATION = 30;
+const SCENES = [[0, 5], [5, 11], [11, 16], [16, 22], [22, 27], [27, 30]];
+const clamp = (x) => Math.max(0, Math.min(1, x));
+const eo = (x) => 1 - Math.pow(1 - x, 3);
+const eio = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const back = (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const p = (t, a, b, f = eo) => f(clamp((t - a) / (b - a)));
+const lerp = (a, b, k) => a + (b - a) * k;
+// transform an SVG group around (ox, oy)
+const tf = (el, { x = 0, y = 0, s = 1, sx, sy, r = 0, ox = 500, oy = 500, o = 1 } = {}) => {
+  el.setAttribute('transform', `translate(${x} ${y}) translate(${ox} ${oy}) rotate(${r}) scale(${sx ?? s} ${sy ?? s}) translate(${-ox} ${-oy})`);
+  el.style.opacity = o;
+};
+// a scene's group: in at a, out at b (crossfade)
+const sceneIO = (t, i) => { const [a, b] = SCENES[i]; return Math.min(p(t, a - 0.1, a + 0.5), i === SCENES.length - 1 ? 1 : 1 - p(t, b - 0.45, b + 0.05, eio)); };
+
+function renderAt(t) {
+  t = Math.max(0, Math.min(DURATION, t));
+  $('prog').style.width = (t / DURATION * 100) + '%';
+  $('brandMill').setAttribute('transform', `rotate(${18 + t * 40} 20 20)`);
+  $('blob1').style.transform = `translate(${Math.sin(t * 0.4) * 30}px, ${Math.cos(t * 0.3) * 24}px)`;
+  $('blob2').style.transform = `translate(${Math.cos(t * 0.35) * 26}px, ${Math.sin(t * 0.5) * 20}px)`;
+  // captions
+  SCENES.forEach(([a, b], i) => {
+    const inn = p(t, a + 0.15, a + 0.9), out = i === SCENES.length - 1 ? 0 : p(t, b - 0.4, b, eio);
+    const el = $('cap' + i);
+    el.style.opacity = Math.min(inn, 1 - out);
+    const dy = (1 - inn) * 40 - out * 30;
+    el.style.transform = TALL ? `translateY(${dy}px)` : `translateY(calc(-50% + ${dy}px))`;
+  });
+
+  // 1. house builds up
+  const s1 = sceneIO(t, 0);
+  tf($('s1'), { o: s1, s: lerp(0.94, 1, s1), oy: 800 });
+  $('ground').setAttribute('stroke-dashoffset', 700 * (1 - p(t, 0.1, 1.0)));
+  tf($('walls'), { sy: p(t, 0.4, 1.3, back), ox: 500, oy: 800 });
+  tf($('roof'), { y: -260 * (1 - p(t, 1.0, 1.8, back)), o: p(t, 1.0, 1.3) });
+  tf($('win1'), { s: p(t, 1.7, 2.2, back), ox: 395, oy: 585 });
+  tf($('win2'), { s: p(t, 1.85, 2.35, back), ox: 605, oy: 585 });
+  tf($('door'), { sy: p(t, 2.0, 2.5, back), ox: 500, oy: 800 });
+  tf($('sign'), { s: p(t, 2.6, 3.2, back), ox: 800, oy: 800, r: Math.sin(t * 3) * 3 * p(t, 3, 3.5) });
+
+  // 2. phone: type the address, home found, three taps
+  const s2 = sceneIO(t, 1);
+  tf($('s2'), { o: s2, y: 160 * (1 - p(t, 5, 6, back)) });
+  const pc = '7001 BS', typed = Math.floor(clamp((t - 5.6) / 0.9) * pc.length);
+  $('typePc').textContent = pc.slice(0, typed) + (t > 5.6 && t < 6.6 && Math.floor(t * 4) % 2 ? '|' : '');
+  $('typeNr').textContent = t > 6.7 ? '6' : '';
+  tf($('found'), { o: p(t, 7.0, 7.4), s: lerp(0.9, 1, p(t, 7.0, 7.6, back)), ox: 500, oy: 455 });
+  tf($('iso3d'), { r: Math.sin(t * 1.4) * 6, ox: 500, oy: 430, y: -6 * Math.sin(t * 2) });
+  ['tile1', 'tile2', 'tile3'].forEach((id, i) => {
+    const on = p(t, 8.2 + i * 0.55, 8.45 + i * 0.55);
+    const g = $(id);
+    tf(g, { o: p(t, 7.6 + i * 0.12, 7.9 + i * 0.12) });
+    g.querySelector('rect').setAttribute('fill', on > 0.5 ? '#E2F3EB' : '#fff');
+    g.querySelector('rect').setAttribute('stroke', on > 0.5 ? '#0E6455' : '#E3DED3');
+    g.querySelectorAll('.tick').forEach((x) => x.setAttribute('opacity', on));
+  });
+  $('sendBtn').setAttribute('height', 40 * p(t, 9.9, 10.3));
+  // finger taps
+  const taps = [[455, 295, 5.5], [580, 295, 6.6], [500, 618, 8.2], [500, 684, 8.75], [500, 750, 9.3], [500, 810, 10.1]];
+  let fx = 500, fy = 900, fo = 0;
+  for (let i = 0; i < taps.length; i++) {
+    const [x, y, at] = taps[i];
+    if (t >= at - 0.35) { const prev = taps[i - 1] || [500, 900]; const k = p(t, at - 0.35, at, eio); fx = lerp(prev[0], x, k); fy = lerp(prev[1], y, k); fo = 1; }
+  }
+  const press = taps.some(([, , at]) => t > at && t < at + 0.18);
+  tf($('finger'), { x: fx, y: fy, ox: 0, oy: 0, s: press ? 0.8 : 1, o: fo * s2 * (1 - p(t, 10.4, 10.7)) });
+
+  // 3. viewing: magnifier over the house, a date circled
+  const s3 = sceneIO(t, 2);
+  tf($('s3'), { o: s3, x: 0 });
+  tf($('isoBig'), { s: lerp(0.85, 1, p(t, 11, 11.8, back)), ox: 420, oy: 760 });
+  const gx = lerp(250, 560, p(t, 11.6, 13.6, eio)), gy = 520 + Math.sin(t * 2.2) * 40;
+  tf($('glass'), { x: gx, y: gy, ox: 0, oy: 0, o: p(t, 11.5, 11.9) });
+  tf($('cal'), { s: p(t, 13.2, 13.8, back), ox: 775, oy: 385 });
+  $('calRing').setAttribute('stroke-dashoffset', 164 * (1 - p(t, 14.0, 14.8)));
+
+  // 4. the offer: document, highlighted price, signature
+  const s4 = sceneIO(t, 3);
+  tf($('s4'), { o: s4 });
+  tf($('doc'), { y: 120 * (1 - p(t, 16, 16.9, back)), r: -3 * (1 - p(t, 16, 17)), oy: 470 });
+  document.querySelectorAll('#doc .ln').forEach((ln, i) => ln.style.opacity = p(t, 16.6 + i * 0.12, 16.9 + i * 0.12));
+  $('hl').setAttribute('width', 390 * p(t, 17.6, 18.3));
+  const sig = p(t, 18.8, 20.6, (x) => x);
+  $('sig').setAttribute('stroke-dashoffset', 420 * (1 - sig));
+  const path = $('sig'), L = path.getTotalLength(), pt = path.getPointAtLength(L * sig);
+  tf($('pen'), { x: pt.x, y: pt.y, ox: 0, oy: 0, o: p(t, 18.5, 18.8) * (1 - p(t, 20.8, 21.2)) });
+  tf($('free'), { s: p(t, 20.4, 21.0, back), ox: 725, oy: 755 });
+
+  // 5. notary: key handed over, paid
+  const s5 = sceneIO(t, 4);
+  tf($('s5'), { o: s5 });
+  tf($('bank'), { y: 60 * (1 - p(t, 22, 22.8, back)) });
+  const kk = p(t, 23.0, 24.6, eio);
+  const kx = lerp(90, 800, kk), ky = 720 - Math.sin(kk * Math.PI) * 120;
+  tf($('key'), { x: kx, y: ky, ox: 0, oy: 0, r: lerp(-30, 20, kk), o: p(t, 22.8, 23.1) * (1 - p(t, 26.6, 27)) });
+  tf($('paid'), { s: p(t, 24.8, 25.4, back), ox: 500, oy: 782 });
+
+  // 6. outro
+  const s6 = sceneIO(t, 5);
+  tf($('s6'), { o: s6 });
+  tf($('bigMill'), { x: 0, y: 0, ox: 0, oy: 0, s: 1 });
+  $('bigMill').setAttribute('transform', `translate(500 ${lerp(470, 400, p(t, 27, 27.8, back))}) scale(${lerp(0.6, 1, p(t, 27, 27.8, back))})`);
+  $('bigBlades').setAttribute('transform', `rotate(${t * 60})`);
+  tf($('cta'), { s: p(t, 27.7, 28.3, back), ox: 500, oy: 748 });
+  $('t-brand').style.opacity = p(t, 27.4, 27.9);
+  $('t-url').style.opacity = p(t, 28.2, 28.7);
+}
+window.renderAt = renderAt;
+window.DURATION = DURATION;
+
+// Fit the stage to the window when watching in a browser; play in a loop unless recording.
+function fit() { const st = $('stage'); const s = Math.min(innerWidth / st.offsetWidth, innerHeight / st.offsetHeight); st.style.transform = q.has('record') ? 'none' : `scale(${s})`; }
+addEventListener('resize', fit); fit();
+renderAt(0);
+document.fonts.ready.then(() => {
+  window.READY = true;
+  if (q.has('record')) return;
+  const t0 = performance.now();
+  const loop = (now) => { renderAt(((now - t0) / 1000) % (DURATION + 1.5)); requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+});
+</script>
+</body>
+</html>

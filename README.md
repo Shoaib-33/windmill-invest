@@ -1,13 +1,13 @@
 # Windmill Invest website (demo)
 
-55 pages from the "Website Content & SEO Master" (28 Oct 2026) in Dutch and English, generated from one content source, plus a small server for the lead forms.
+A website for **sellers**: 26 pages in Dutch and English (from the "Website Content & SEO Master", 28 Oct 2026, narrowed to selling: Windmill Invest only buys, so the invest, develop, manage, commercial and advisory sections were removed), 7 ad landing pages, and a small server for the lead forms.
 
 ## Languages
 
 - Dutch is the main language, at the root: `/huis-verkopen/`. English is under `/en/`: `/en/sell-your-house/`.
 - `content/*.js` holds the Dutch copy (verbatim from the document), `content/en/*.js` the English translation. English pages use the Dutch slug as their ID; their URLs come from `EN_PATHS` in `lib/pages.js`.
 - The checker compares every English page with its Dutch original (same links, sections, lists, tables, FAQs), so a translation can never drift in structure. After changing a Dutch page, update its English twin.
-- Fixed interface text (menu, cookie banner, forms, calculator) is in `lib/render.js` (`UI`), `lib/forms.js` (`FORMS_EN`) and `assets/site.js` (`M`).
+- Fixed interface text (menu, cookie banner, forms) is in `lib/render.js` (`UI`), `lib/forms.js` (`FORMS_EN`) and `assets/site.js` (`M`).
 - Every page links to its other-language twin (NL/EN button, `hreflang` tags and sitemap alternates). English legal pages say the Dutch version prevails.
 - Inquiries record the language used (`lang` column in the admin and CSV), so you can reply in it.
 
@@ -81,14 +81,21 @@ The deploy prints the site's URL. Its log should say "Inquiries: stored in the P
 
 - `content/*.js` – the page copy, one object per page (format in `content/SCHEMA.md`).
 - `lib/pages.js` – the sitemap: every URL, its division and its form.
-- `lib/forms.js` – the 8 lead forms; the pages and the server both use these definitions.
+- `lib/forms.js` – the lead forms (seller form in three steps, tenanted, commercial, contact, and the landing-page funnels); the pages and the server both use these definitions.
 - `lib/render.js`, `build.js` – turn content into HTML in `dist/`.
 - `server.js`, `lib/db.js` – serves `dist/` and stores inquiries in PostgreSQL (built-in locally, Cloud SQL on GCP).
 - `Dockerfile` – the container for Cloud Run.
 - `lib/funnels.js` – the 7 ad landing pages (Engine blueprint): /snel-verkopen/, /scheiding/, /erfenis/, /verkopen-zoals-het-is/, /energielabel/, /verhuurd-verkopen/, /portefeuille/. One link each in two languages: Dutch by default, English at the same link with `?lang=en` (the NL/EN button switches; built as `index.en.html`). Noindex, not in the menu or sitemap. Multi-step forms in `lib/forms.js` (`funnel_*`), in the blueprint's order: address → property → motivation → timeline → condition and mortgage → contact details. Optional photos (`lib/photos.js`, up to 5, made smaller in the browser, stored in `lead_photos`; the CRM downloads them with its token). Partial save: after each step, if the visitor accepted statistics or marketing cookies, the answers so far (never contact details) go to `lead_drafts`, shown on the admin page as "Onafgemaakte formulieren" and deleted after 30 days.
-- `lib/bag.js` – address lookup in the BAG via PDOK (free, no key): the forms show the address found, and each lead gets its BAG id.
+- `lib/bag.js` – address lookup in the BAG via PDOK (free, no key): the forms show the address found with an aerial photo (PDOK Luchtfoto, proxied through `/api/tile/…` so visitors only talk to this site) and the build year, floor area and use (`/api/house`); each lead gets its BAG id and those facts (`bag_build_year`, `bag_area_m2`, `bag_use`) for the valuation.
+- `/brief/`: the page for homeowners who received a letter. Print `windmillinvest.nl/brief` (or a QR code to `/brief/?code=…`) on the letter; the code is stored as `utm_content` with `utm_source=brief`, so each letter campaign can be measured.
+- The header button opens the offer form sliding in from the side, on every page.
+- 3D: the house card turns the building into a rotating 3D model (`/api/model`, from the 3D BAG by TU Delft, drawn on a canvas by `assets/site.js`); no model means the aerial photo stays.
+- After sending, the thank-you panel shows a personal sale plan (documents to get ready, chosen by situation) that the seller can save as PDF or print.
+- Text areas have a microphone where the browser supports speech recognition. Chrome and Edge send the audio to their own speech service: mention this in the privacy statement before going live.
+- "Bel mij terug": every page has a small call-back dialog (form `terugbellen`: name, phone, best moment; email optional).
 - `lib/lead-event.js`, `lib/forwarder.js`, `docs/lead-contract.md` – the hand-over of each lead to Windmill CRM (built separately): the message, its delivery with retries, and the contract for the CRM team. Each inquiry is stored together with its consent ledger rows and its CRM event in one transaction.
-- `assets/` – stylesheet, browser script, logo.
+- `assets/` – stylesheet, browser script, logo. `assets/img/` holds the photos (WebP, two sizes each, from Pexels: free to use commercially, no credit required). Which photo each page shows is set in `lib/render.js` (`PAGE_IMG`, `FUNNEL_IMG`).
+- Design: the home page is built from its content sections, each with a `look` (situations, steps, compare, promises) in `content/core.js`. Scroll animations use `.reveal` (shown by `assets/site.js`) and switch off for visitors who ask for less motion.
 
 Leads: `/admin` (login `admin` / `demo` by default) and `/admin/inquiries.csv`.
 
@@ -104,6 +111,7 @@ All company details are demo values marked "(demo)". Set them as environment var
 | `PROMISE_OFFER_24H`, `PROMISE_AS_IS`, `PROMISE_CASH_ADVANCE`, `PROMISE_RENT_BACK`, `PROMISE_TRANSFER_DATE`, `PROMISE_NOTARY_COSTS` | `true` shows that offer promise (with its condition) on the ad landing pages and adds its questions to their forms. All off by default. `RENT_BACK_YEARS` sets the rent-back term (default 2). |
 | `CRM_LEAD_API_URL`, `CRM_API_TOKEN`, `CRM_SIGNING_SECRET` | Windmill CRM's Lead API; every lead is forwarded there (see `docs/lead-contract.md`). Until set, leads wait in the website database. |
 | `ADMIN_PASSWORD` | Admin login (required) |
+| `WHATSAPP` | WhatsApp number (e.g. `31612345678`). Shows a WhatsApp button with a ready-made message; hidden while empty. |
 | `GTM_ID` | Google Tag Manager container, loads only after consent |
 | `OFFERS_RENT_BACK=false` | Hides the "verkopen en terughuren" page if that service is not offered |
 | `TRUST_PROXY=true` | When behind Cloudflare or a proxy |
