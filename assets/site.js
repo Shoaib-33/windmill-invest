@@ -321,8 +321,22 @@
     var steps = Array.prototype.slice.call(form.querySelectorAll('.form-step'));
     var current = 0;
     var progress = form.querySelector('[data-step-progress]');
+    var summary = form.querySelector('[data-house-summary]');
+    function placeHouse(i) {
+      if (!summary || !addrBox) return;
+      var card = (i === 0 ? summary : addrBox).querySelector('.house-card');
+      if (i === 0) {
+        if (card) addrBox.appendChild(card);
+        summary.hidden = true;
+      } else {
+        if (card) summary.appendChild(card);
+        summary.hidden = !summary.querySelector('.house-card');
+      }
+    }
     function showStep(i, focus) {
       current = i;
+      form.classList.toggle('on-first', i === 0);
+      placeHouse(i);
       steps.forEach(function (s, j) { s.hidden = j !== i; });
       if (progress) {
         progress.querySelector('[data-step-label]').textContent = M.step.replace('{n}', i + 1).replace('{t}', steps.length) + ': ' + steps[i].getAttribute('data-step-title');
@@ -436,6 +450,8 @@
       else { var old = addrBox.querySelector('.house-card'); if (old) old.remove(); }
       addrBox.hidden = false;
       addrBox.appendChild(card);
+      // The visitor may already be on step 2 (fast "Next"): then the home goes straight to the strip above the steps.
+      if (typeof current === 'number' && current > 0) placeHouse(current);
       track('address_found', { form_type: formType, page: location.pathname });
       fetch('/api/house?id=' + encodeURIComponent(m.id))
         .then(function (r) { return r.json(); })
@@ -553,7 +569,7 @@
         draw();
         if (!still || dragging) raf = requestAnimationFrame(frame);
       }
-      function start() { size(); if (!raf) raf = requestAnimationFrame(frame); }
+      function start() { if (!box.clientWidth) return; size(); if (!raf) raf = requestAnimationFrame(frame); }
       canvas.addEventListener('pointerdown', function (e) { dragging = true; lastX = e.clientX; lastY = e.clientY; canvas.setPointerCapture(e.pointerId); start(); });
       canvas.addEventListener('pointermove', function (e) {
         if (!dragging) return;
@@ -563,7 +579,9 @@
         if (still) draw();
       });
       canvas.addEventListener('pointerup', function () { dragging = false; idle = Date.now() + 2500; });
-      window.addEventListener('resize', function () { if (canvas.isConnected) { size(); draw(); } });
+      var refit = function () { if (canvas.isConnected && box.clientWidth) { size(); draw(); start(); } };
+      if ('ResizeObserver' in window) new ResizeObserver(refit).observe(box);
+      else window.addEventListener('resize', refit);
       start();
       track('model_3d_shown', { page: location.pathname });
     }

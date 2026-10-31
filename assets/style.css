@@ -804,3 +804,59 @@ html.large-text .note, html.large-text .consent, html.large-text figcaption { fo
   .hero .video-thumb { margin-top: 12px; }
   .hero-copy .ticks { margin-top: 14px; }
 }
+
+/* ---------- The form, more inviting ---------- */
+.lead-form-main { position: relative; border: 1.5px solid color-mix(in srgb, var(--mint) 55%, var(--line)); box-shadow: 0 0 0 6px color-mix(in srgb, var(--mint) 14%, transparent), var(--shadow); }
+.form-badge { position: absolute; top: -14px; right: 22px; padding: 6px 14px; border-radius: 999px; background: var(--action); color: #fff; font: 700 .8rem/1 var(--sans); letter-spacing: .02em; box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--action) 80%, transparent); }
+.form-teaser { display: flex; align-items: center; gap: 12px; margin: 4px 0 2px; padding: 10px 12px; border-radius: 14px; background: var(--mint-soft); font-weight: 600; font-size: .95rem; color: var(--link); }
+.form-teaser .quick-aerial { width: 46px; height: 46px; border-radius: 12px; }
+.lead-form.js-steps:not(.on-first) .form-teaser { display: none; }
+.lead-form.sent .form-teaser, .lead-form.sent .form-trust, .lead-form.sent .form-badge { display: none; }
+.form-trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; margin: 14px 0 0; font-size: .82rem; color: var(--muted); }
+.form-trust span { display: inline-flex; align-items: center; gap: 5px; }
+.form-trust .ico { width: 14px; height: 14px; color: var(--ok); stroke-width: 3; }
+.lead-form-main .step-nav .btn-action, .lead-form-main > .btn-action, .lead-form-main .form-step .btn-action[type=submit] { animation: nudge 3.5s ease-in-out 2s infinite; }
+@keyframes nudge { 0%, 90%, 100% { transform: none; } 94% { transform: translateY(-3px); } 97% { transform: translateY(1px); } }
+:root[data-theme="dark"] .lead-form-main { background: #18282A; border-color: rgb(143 221 189 / .45); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lead-form-main { background: #18282A; border-color: rgb(143 221 189 / .45); } }
+
+/* ---------- Selling pages: photo header with the form in it ---------- */
+.page-hero-form { position: relative; isolation: isolate; overflow: hidden; color: #fff; padding: 40px 0 64px; border-bottom: 0; background: var(--brand-ink); }
+.page-hero-form .hero-media::after { background: linear-gradient(100deg, rgb(4 26 22 / .93) 0%, rgb(4 26 22 / .8) 50%, rgb(4 26 22 / .55) 100%); }
+.page-hero-form .hero-img { animation-duration: 30s; }
+.page-hero-form h1 { color: #fff; max-width: 18ch; }
+.page-hero-form .hero-lead { color: rgb(255 255 255 / .86); }
+.page-hero-form .breadcrumb ol, .page-hero-form .breadcrumb a { color: rgb(255 255 255 / .7); }
+.page-hero-form .breadcrumb li + li::before { color: rgb(255 255 255 / .4); }
+.page-hero-form .hero-callback .callback-link { color: #fff; }
+.hero-form { color: var(--ink); animation: fadeUp 1s var(--ease) .15s both; }
+.hero-form .lead-form { box-shadow: 0 0 0 6px rgb(143 221 189 / .22), 0 40px 80px -30px rgb(0 0 0 / .6); }
+@media (min-width: 1000px) { .page-hero-form .funnel-grid { grid-template-columns: minmax(0, 1fr) 460px; gap: 64px; align-items: center; } }
+
+/* Beside the text: a small card that brings you back to the form */
+.side-card { padding: 24px; border-radius: var(--radius); background: var(--brand); color: var(--on-dark); box-shadow: var(--shadow); }
+.side-title { font: 700 1.35rem/1.2 var(--display); color: #fff; margin-bottom: 6px; }
+.side-card p { color: var(--on-dark-muted); font-size: .95rem; }
+.side-card .btn { width: 100%; margin: 6px 0 14px; }
+.side-call { display: flex; align-items: center; justify-content: center; gap: 8px; color: #fff; font-weight: 600; text-decoration: none; margin-bottom: 8px; }
+.side-card .callback-link { display: block; width: 100%; text-align: center; color: var(--mint); }
+
+/* Once the home is found, the hint has done its job. */
+.lead-form:has(.address-result.found:not([hidden])) .form-teaser { display: none; }
+
+/* Home: the full form in the hero (step 1 is the address, so the house appears right there). */
+@media (min-width: 1000px) { .hero-inner { grid-template-columns: minmax(0, 1.1fr) minmax(420px, 460px); } }
+.hero .hero-form .lead-form { box-shadow: 0 0 0 6px rgb(143 221 189 / .22), 0 40px 80px -30px rgb(0 0 0 / .6); }
+.hero .hero-form { animation: fadeUp 1s var(--ease) .5s both; }
+@media (min-width: 1000px) and (max-height: 860px) { .hero .lead-form { padding: 22px 24px; } .hero .form-intro { margin-bottom: .6em; } }
+
+/* After step 1 the found home stays in view, compact, above the questions. */
+.house-summary { margin: 4px 0 6px; }
+.house-summary .house-card { display: grid; grid-template-columns: 132px 1fr; align-items: stretch; animation: fadeUp .4s var(--ease); }
+.house-summary .house-map { height: auto; min-height: 104px; }
+.house-summary .house-views { left: 6px; bottom: 6px; padding: 2px; }
+.house-summary .house-views button { padding: 4px 8px; font-size: .68rem; }
+.house-summary .house-info { padding: 10px 12px; align-content: center; }
+.house-summary .house-info strong { font-size: .9rem; line-height: 1.3; }
+.house-summary .house-found { font-size: .68rem; }
+.house-summary .house-facts span { font-size: .74rem; padding: 3px 8px; }
