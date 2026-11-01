@@ -514,6 +514,34 @@ await test('admin in Dutch and English, answers in plain words', async () => {
   assert.doesNotMatch(en, /<b>timeline<\/b>/);
 });
 
+await test('reviews appear on the site only after approval in the admin', async () => {
+  const send = (body) => fetch(base + '/api/reviews', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const review = { rating: 4, name: 'Anna', place: 'Utrecht', text: 'Snel en duidelijk, precies zoals beloofd.', email: 'anna@example.nl', consent: true, lang: 'nl' };
+  assert.equal((await send({ ...review, text: 'te kort' })).status, 422);
+  assert.equal((await send({ ...review, consent: false })).status, 422);
+  assert.equal((await send({ ...review, rating: 6 })).status, 422);
+  assert.equal((await send(review)).status, 201);
+  const before = await (await fetch(base + '/api/reviews')).json();
+  assert.equal(before.reviews.length, 0, 'pending reviews stay hidden');
+
+  const admin = await (await fetch(base + '/admin', { headers: auth })).text();
+  assert.match(admin, /Snel en duidelijk/);
+  const id = admin.match(/action="\/admin\/reviews\/(\d+)"/)[1];
+  const forged = await fetch(`${base}/admin/reviews/${id}`, { method: 'POST', redirect: 'manual', headers: { ...auth, origin: 'https://evil.example', 'content-type': 'application/x-www-form-urlencoded' }, body: 'action=approve' });
+  assert.equal(forged.status, 403);
+  const ok = await fetch(`${base}/admin/reviews/${id}`, { method: 'POST', redirect: 'manual', headers: { ...auth, origin: base, 'content-type': 'application/x-www-form-urlencoded' }, body: 'action=approve' });
+  assert.equal(ok.status, 303);
+
+  const after = await (await fetch(base + '/api/reviews')).json();
+  assert.equal(after.count, 1);
+  assert.equal(after.avg, 4);
+  assert.deepEqual(Object.keys(after.reviews[0]).sort(), ['date', 'name', 'place', 'rating', 'text']);
+  assert.ok(!JSON.stringify(after).includes('anna@example.nl'), 'email is never public');
+  const home = await (await fetch(base + '/')).text();
+  assert.match(home, /data-reviews/);
+  assert.match(home, /data-review-form/);
+});
+
 await test('rate limit kicks in', async () => {
   let last;
   for (let i = 0; i < 85; i++) last = await post(valid);

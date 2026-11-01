@@ -860,3 +860,50 @@ html.large-text .note, html.large-text .consent, html.large-text figcaption { fo
 .house-summary .house-info strong { font-size: .9rem; line-height: 1.3; }
 .house-summary .house-found { font-size: .68rem; }
 .house-summary .house-facts span { font-size: .74rem; padding: 3px 8px; }
+
+/* ---------- Reviews ---------- */
+.reviews { padding: 88px 0; background: var(--sand); }
+.reviews-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 32px; margin-bottom: 32px; }
+.reviews-head h2 { margin: 6px 0 0; }
+.reviews-head .btn { display: inline-flex; align-items: center; gap: 8px; }
+.reviews-head .btn .star { width: 18px; height: 18px; fill: #F5A524; }
+.reviews-score { display: inline-flex; align-items: center; gap: 10px; margin-top: 14px; padding: 10px 18px; border-radius: 999px; background: var(--surface); box-shadow: var(--shadow-sm); }
+.reviews-score strong { font: 800 1.6rem/1 var(--display); }
+.reviews-score small { color: var(--muted); font-size: .86rem; }
+.stars { display: inline-flex; gap: 2px; }
+.stars i { display: inline-flex; }
+.stars .star { width: 18px; height: 18px; fill: var(--line-strong); }
+.stars i.on .star { fill: #F5A524; }
+.review-row { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); align-items: start; }
+@media (max-width: 640px) {
+  .review-row { grid-auto-flow: column; grid-auto-columns: 86%; grid-template-columns: none; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; margin: 0 -16px; padding-inline: 16px; scroll-padding-inline: 16px; }
+  .review-card { scroll-snap-align: start; }
+}
+.review-card { margin: 0; display: grid; gap: 14px; padding: 24px; border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-sm); border: 1px solid var(--line); transition: transform .35s var(--ease), box-shadow .35s var(--ease); }
+.review-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.review-card blockquote { margin: 0; white-space: pre-line; line-height: 1.6; }
+.review-card blockquote::before { content: '“'; display: block; height: .5em; font: 800 2.6rem/1 var(--display); color: var(--mint); }
+.review-card figcaption { display: flex; align-items: center; gap: 12px; }
+.review-card figcaption strong { display: block; }
+.review-card figcaption small { color: var(--muted); font-size: .84rem; }
+.review-avatar { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--brand); color: #fff; font-weight: 700; flex: none; }
+.review-more { grid-column: 1 / -1; justify-self: center; }
+.reviews-empty { grid-column: 1 / -1; margin: 0; padding: 28px; border: 2px dashed var(--line-strong); border-radius: var(--radius); text-align: center; color: var(--muted); }
+.reviews-check { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 24px 0 0; font-size: .86rem; color: var(--muted); }
+.reviews-check .ico { width: 16px; height: 16px; color: var(--ok); }
+
+/* The review form: stars you click (shown right-to-left so "this star and the ones before it" light up) */
+.star-field { border: 0; padding: 0; margin: 0; min-width: 0; }
+.star-field legend { font-weight: 600; margin-bottom: 6px; padding: 0; }
+.star-input { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 4px; }
+.star-input input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.star-input label { cursor: pointer; padding: 2px; border-radius: 8px; }
+.star-input .star { width: 34px; height: 34px; fill: var(--line-strong); transition: fill .15s, transform .15s; }
+.star-input label:hover .star, .star-input label:hover ~ label .star, .star-input input:checked ~ label .star { fill: #F5A524; }
+.star-input label:hover .star { transform: scale(1.12); }
+.star-input input:focus-visible + label { outline: 2px solid var(--brand-2); outline-offset: 2px; }
+.field-hint { margin: 4px 0 0; font-size: .82rem; color: var(--muted); }
+.review-form.sent .fields, .review-form.sent .consent, .review-form.sent [type=submit], .review-form.sent .form-intro { display: none; }
+.review-form.sent .form-status { font-weight: 600; color: var(--ok); font-size: 1.05rem; }
+
+.reviews-score[hidden] { display: none; }

@@ -885,5 +885,97 @@
     each('[data-callback-open]', function (b) { b.hidden = true; });
   }
 
+  // ---------- Reviews: approved ones from the server, and the "write a review" dialog ----------
+  var rvSection = document.querySelector('[data-reviews]');
+  if (rvSection) {
+    var RT = JSON.parse(rvSection.getAttribute('data-text') || '{}');
+    var STAR = '<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>';
+    var starRow = function (n) {
+      var s = '';
+      for (var i = 1; i <= 5; i++) s += '<i class="' + (i <= Math.round(n) ? 'on' : '') + '">' + STAR + '</i>';
+      return '<span class="stars" role="img" aria-label="' + escHtml(RT.stars.replace('{n}', n)) + '">' + s + '</span>';
+    };
+    var list = rvSection.querySelector('[data-reviews-list]');
+    var reviewCard = function (r) {
+      var date = new Date(r.date + 'T12:00:00Z').toLocaleDateString(M.locale, { month: 'long', year: 'numeric' });
+      return '<figure class="review-card reveal in">' + starRow(r.rating) + '<blockquote>' + escHtml(r.text) + '</blockquote>' +
+        '<figcaption><span class="review-avatar" aria-hidden="true">' + escHtml(r.name.charAt(0).toUpperCase()) + '</span><span><strong>' + escHtml(r.name) + '</strong>' +
+        '<small>' + escHtml([r.place, date].filter(Boolean).join(' · ')) + '</small></span></figcaption></figure>';
+    };
+    fetch('/api/reviews').then(function (res) { return res.ok ? res.json() : null; }).then(function (data) {
+      if (!data || !data.reviews || !data.reviews.length) return;
+      var shown = 6;
+      var render = function () {
+        list.innerHTML = data.reviews.slice(0, shown).map(reviewCard).join('');
+        if (data.reviews.length > shown) {
+          var more = document.createElement('button');
+          more.type = 'button';
+          more.className = 'btn btn-plain review-more';
+          more.textContent = RT.more;
+          more.addEventListener('click', function () { shown += 6; render(); });
+          list.appendChild(more);
+        }
+      };
+      render();
+      var score = rvSection.querySelector('[data-reviews-score]');
+      score.querySelector('[data-reviews-avg]').textContent = data.avg.toLocaleString(M.locale, { minimumFractionDigits: 1 });
+      score.querySelector('[data-reviews-stars]').outerHTML = starRow(data.avg);
+      score.querySelector('[data-reviews-count]').textContent = RT.of + ' · ' + data.count + ' ' + (data.count === 1 ? RT.one.replace(/^1 /, '') : RT.many);
+      score.hidden = false;
+    }).catch(function () { /* the empty text stays */ });
+
+    var rvDialog = document.querySelector('[data-review-dialog]');
+    if (rvDialog && typeof rvDialog.showModal === 'function') {
+      var rvForm = rvDialog.querySelector('[data-review-form]');
+      var rvStatus = rvForm.querySelector('.form-status');
+      var RV = LANG === 'en'
+        ? { short: 'Please write at least 20 characters.', stars: 'Please choose 1 to 5 stars.', consent: 'Please tick this box so we may show your review.', thanks: 'Thank you! Your review will appear on the site after a check.' }
+        : { short: 'Schrijf minimaal 20 tekens.', stars: 'Kies 1 tot 5 sterren.', consent: 'Vink dit aan, zodat we uw review mogen tonen.', thanks: 'Bedankt! Uw review verschijnt na controle op de site.' };
+      each('[data-review-open]', function (b) {
+        b.addEventListener('click', function () {
+          rvDialog.showModal();
+          track('review_open', { page: location.pathname });
+        });
+      });
+      rvDialog.addEventListener('click', function (e) { if (e.target === rvDialog || e.target.closest('[data-review-close]')) rvDialog.close(); });
+      var showErr = function (name, msg) {
+        var p = rvForm.querySelector('[data-error-for="' + name + '"]');
+        if (p) { p.textContent = msg || ''; p.hidden = !msg; }
+      };
+      rvForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var f = rvForm.elements;
+        var rating = (rvForm.querySelector('input[name=rating]:checked') || {}).value;
+        var errs = {
+          rating: rating ? '' : RV.stars,
+          name: f.name.value.trim().length >= 2 ? '' : M.required,
+          text: f.text.value.trim().length >= 20 ? '' : RV.short,
+          email: !f.email.value.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.value.trim()) ? '' : M.email,
+          consent: f.consent.checked ? '' : RV.consent,
+        };
+        var bad = false;
+        for (var k in errs) { showErr(k, errs[k]); if (errs[k]) bad = true; }
+        if (bad) { rvStatus.textContent = M.check; return; }
+        rvStatus.textContent = M.sending;
+        var btn = rvForm.querySelector('[type=submit]');
+        btn.disabled = true;
+        fetch('/api/reviews', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ rating: Number(rating), name: f.name.value, place: f.place.value, text: f.text.value, email: f.email.value, consent: true, lang: LANG, page: location.pathname, website: f.website.value }),
+        }).then(function (res) {
+          btn.disabled = false;
+          if (res.status === 429) { rvStatus.textContent = M.tooMany; return; }
+          if (!res.ok) { rvStatus.textContent = M.failed; return; }
+          rvForm.reset();
+          rvForm.classList.add('sent');
+          rvStatus.textContent = RV.thanks;
+          track('review_submit', { page: location.pathname, rating: Number(rating) });
+        }, function () { btn.disabled = false; rvStatus.textContent = M.offline; });
+      });
+    } else {
+      each('[data-review-open]', function (b) { b.hidden = true; });
+    }
+  }
+
   if (SITE.template === 'article') track('article_view', { page: location.pathname, language: LANG });
 })();

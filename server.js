@@ -14,6 +14,7 @@ import { SLUGS } from './lib/pages.js';
 import { esc } from './lib/render.js';
 import { createAddressLookup, createHouseDetails, createModel3d, createTileFetcher } from './lib/bag.js';
 import { FUNNEL_SLUGS } from './lib/funnels.js';
+import { REVIEW_STATUSES, publicReview, validateReview } from './lib/reviews.js';
 
 // Adds the BAG address to an inquiry with a postcode and house number: the visitor's choice (address_id)
 // when it is one of the matches, else the only match. Looked up again on the server, never trusted from the
@@ -180,6 +181,10 @@ const ADMIN_TEXT = {
     stoppedAfter: (n) => `gestopt na stap ${n}`, step: 'stap', unfinishedCols: ['Laatst', 'Formulier', 'Antwoorden', 'Pagina / bron'],
     extra: { street: 'Straat', city: 'Plaats', house_letter: 'Huisletter', house_addition: 'Toevoeging', bag_vbo_id: 'BAG-verblijfsobject', bag_nummeraanduiding_id: 'BAG-nummeraanduiding', bag_build_year: 'Bouwjaar (BAG)', bag_area_m2: 'Oppervlakte in m² (BAG)', bag_use: 'Gebruiksdoel (BAG)' },
     yes: 'Ja',
+    reviews: 'Reviews', reviewsIntro: 'Nieuwe reviews verschijnen pas op de site als u ze goedkeurt. Keur ook kritische reviews goed als ze echt zijn: alleen positieve reviews tonen is misleidend.',
+    reviewCols: ['Datum', 'Sterren', 'Review', 'Naam / plaats', 'E-mail (niet zichtbaar)', 'Status', ''],
+    reviewStatus: { pending: 'Wacht op controle', approved: 'Op de site', rejected: 'Afgewezen' },
+    approve: 'Goedkeuren', reject: 'Afwijzen', remove: 'Verwijderen', noReviews: 'Nog geen reviews.',
   },
   en: {
     title: 'Inquiries', csv: 'Download all as CSV', newest: 'Newest', older: 'Older inquiries →', none: 'No inquiries yet.',
@@ -195,6 +200,10 @@ const ADMIN_TEXT = {
     stoppedAfter: (n) => `stopped after step ${n}`, step: 'step', unfinishedCols: ['Last', 'Form', 'Answers', 'Page / source'],
     extra: { street: 'Street', city: 'Town', house_letter: 'House letter', house_addition: 'Addition', bag_vbo_id: 'BAG residential object', bag_nummeraanduiding_id: 'BAG address id', bag_build_year: 'Build year (BAG)', bag_area_m2: 'Floor area in m² (BAG)', bag_use: 'Use (BAG)' },
     yes: 'Yes',
+    reviews: 'Reviews', reviewsIntro: 'New reviews only appear on the site after you approve them. Approve critical reviews too when they are genuine: showing only positive ones is misleading.',
+    reviewCols: ['Date', 'Stars', 'Review', 'Name / town', 'Email (not shown)', 'Status', ''],
+    reviewStatus: { pending: 'Waiting for check', approved: 'On the site', rejected: 'Rejected' },
+    approve: 'Approve', reject: 'Reject', remove: 'Delete', noReviews: 'No reviews yet.',
   },
 };
 
@@ -227,7 +236,21 @@ function unfinishedSection({ perStep, recent }, lang) {
 <div class="wrap"><table><thead><tr>${t.unfinishedCols.map((c) => `<th>${c}</th>`).join('')}</tr></thead><tbody>${tr}</tbody></table></div></details>`;
 }
 
-function adminPage(rows, total, beforeId, outbox, unfinished, lang = 'nl') {
+// Reviews waiting for a decision first, then the rest. Each row has buttons that post back to /admin/reviews/:id.
+function reviewsSection(reviews, lang) {
+  const t = ADMIN_TEXT[lang];
+  const order = { pending: 0, approved: 1, rejected: 2 };
+  const sorted = [...reviews].sort((a, b) => order[a.status] - order[b.status] || b.id - a.id);
+  const pending = reviews.filter((r) => r.status === 'pending').length;
+  const button = (action, label) => `<button name="action" value="${action}">${label}</button>`;
+  const tr = sorted.map((r) => `<tr${r.status === 'pending' ? ' style="background:#fff8e6"' : ''}><td>${esc(r.created_at.slice(0, 16).replace('T', ' '))}</td><td>${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</td>
+<td style="white-space:pre-line;max-width:420px">${esc(r.text)}</td><td>${esc(r.name)}${r.place ? `<br><small>${esc(r.place)}</small>` : ''}</td><td>${r.email ? `<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>` : '–'}</td>
+<td>${esc(t.reviewStatus[r.status])}</td><td><form method="post" action="/admin/reviews/${r.id}${lang === 'en' ? '?lang=en' : ''}" style="display:flex;gap:4px;flex-wrap:wrap">${r.status !== 'approved' ? button('approve', t.approve) : ''}${r.status !== 'rejected' ? button('reject', t.reject) : ''}${button('delete', t.remove)}</form></td></tr>`).join('');
+  return `<details id="reviews"${pending ? ' open' : ''}><summary><b>${t.reviews} (${reviews.length}${pending ? `, ${pending} ${t.reviewStatus.pending.toLowerCase()}` : ''})</b></summary><p>${t.reviewsIntro}</p>
+<div class="wrap"><table><thead><tr>${t.reviewCols.map((c) => `<th>${c}</th>`).join('')}</tr></thead><tbody>${tr || `<tr><td colspan="7">${t.noReviews}</td></tr>`}</tbody></table></div></details>`;
+}
+
+function adminPage(rows, total, beforeId, outbox, unfinished, lang = 'nl', reviews = []) {
   const t = ADMIN_TEXT[lang];
   const href = (l, params = '') => {
     const p = [params, l === 'en' && 'lang=en'].filter(Boolean);
@@ -251,6 +274,7 @@ function adminPage(rows, total, beforeId, outbox, unfinished, lang = 'nl') {
 th,td{border:1px solid #d4dcd6;padding:8px;text-align:left;vertical-align:top}th{background:#edf1ec}.wrap{overflow-x:auto}a{color:#0f5c53}
 .top{display:flex;justify-content:space-between;align-items:baseline;gap:16px}.lang{font-size:14px}</style></head>
 <body><div class="top"><h1>${t.title} (${total.toLocaleString(lang === 'en' ? 'en-GB' : 'nl-NL')})</h1>${switcher}</div><p><a href="/admin/inquiries.csv">${t.csv}</a>${beforeId ? ` · <a href="${href(lang)}">${t.newest}</a>` : ''}</p>
+${reviewsSection(reviews, lang)}
 ${unfinishedSection(unfinished, lang)}
 ${backlog ? `<p><b>CRM:</b> ${t.backlog(outbox.pending || 0, outbox.failed || 0)}${config.crmLeadUrl ? '' : t.noCrm}</p>` : ''}
 <div class="wrap"><table><thead><tr>${t.cols.map((c) => `<th>${c}</th>`).join('')}</tr></thead>
@@ -283,6 +307,7 @@ export async function createApp({ dbPath = config.databaseUrl || (config.storage
   const lookupLimited = rateLimiter(60);
   const draftLimited = rateLimiter(60);
   const tileLimited = rateLimiter(600);
+  const reviewLimited = rateLimiter(5);
   // Unfinished forms are kept for DRAFT_DAYS days only.
   const pruneDrafts = () => db.drafts.prune().catch((err) => console.error(`Could not remove old drafts: ${err.message}`));
   pruneDrafts();
@@ -307,9 +332,22 @@ export async function createApp({ dbPath = config.databaseUrl || (config.storage
       const noStore = { 'cache-control': 'no-store', 'x-robots-tag': 'noindex' };
       if (req.method === 'GET' && (path === '/admin' || path === '/admin/')) {
         const beforeId = Number(url.searchParams.get('before')) || null;
-        const [rows, total, outbox, unfinished] = await Promise.all([db.list({ limit: ADMIN_PAGE_SIZE, beforeId }), db.count(), db.outbox.stats(), db.drafts.unfinished()]);
+        const [rows, total, outbox, unfinished, reviews] = await Promise.all([db.list({ limit: ADMIN_PAGE_SIZE, beforeId }), db.count(), db.outbox.stats(), db.drafts.unfinished(), db.reviews.list({ limit: 300 })]);
         const lang = url.searchParams.get('lang') === 'en' ? 'en' : 'nl';
-        return send(res, 200, adminPage(rows, total, beforeId, outbox, unfinished, lang), 'text/html; charset=utf-8', noStore);
+        return send(res, 200, adminPage(rows, total, beforeId, outbox, unfinished, lang, reviews), 'text/html; charset=utf-8', noStore);
+      }
+      // Approve, reject or delete a review (buttons on the admin page).
+      const reviewAction = path.match(/^\/admin\/reviews\/(\d{1,15})$/);
+      if (req.method === 'POST' && reviewAction) {
+        // Basic auth is sent by the browser on any request, so only accept posts that come from the admin page itself.
+        if (!sameOrigin(req) || (!req.headers.origin && !String(req.headers.referer || '').includes(`//${req.headers.host}/`))) return send(res, 403, 'Forbidden', 'text/plain');
+        const action = new URLSearchParams(await readBody(req, 2000)).get('action');
+        const id = Number(reviewAction[1]);
+        const status = { approve: 'approved', reject: 'rejected' }[action];
+        if (status && REVIEW_STATUSES.includes(status)) await db.reviews.setStatus(id, status);
+        else if (action === 'delete') await db.reviews.remove(id);
+        else return send(res, 400, 'Bad request', 'text/plain');
+        return send(res, 303, '', 'text/plain', { location: `/admin${url.searchParams.get('lang') === 'en' ? '?lang=en' : ''}#reviews`, ...noStore });
       }
       if (req.method === 'GET' && path === '/admin/inquiries.csv') return streamCsv(res, db);
       const adminPhoto = path.match(/^\/admin\/photos\/(\d{1,15})$/);
@@ -359,6 +397,26 @@ export async function createApp({ dbPath = config.databaseUrl || (config.storage
       if (req.method !== 'GET') return sendJson(res, 405, { ok: false });
       if (!crmToken || !sameSecret(req.headers.authorization || '', `Bearer ${crmToken}`)) return sendJson(res, 401, { ok: false });
       return sendPhoto(res, await db.photo(Number(photoMatch[1])));
+    }
+
+    // Reviews: GET lists the approved ones for the site; POST sends a new one, which waits for approval.
+    if (path === '/api/reviews') {
+      if (req.method === 'GET') {
+        const [list, summary] = await Promise.all([db.reviews.list({ status: 'approved', limit: 60 }), db.reviews.summary()]);
+        return sendJson(res, 200, { ok: true, count: summary.count, avg: Math.round(summary.avg * 10) / 10, reviews: list.map(publicReview) });
+      }
+      if (req.method !== 'POST') return sendJson(res, 405, { ok: false });
+      if (!sameOrigin(req)) return sendJson(res, 403, { ok: false });
+      const ip = clientIp(req);
+      if (reviewLimited(ip)) return sendJson(res, 429, { ok: false });
+      let input;
+      try { input = JSON.parse(await readBody(req, 10_000)); } catch (err) { return sendJson(res, err.status || 400, { ok: false }); }
+      if (!input || typeof input !== 'object') return sendJson(res, 400, { ok: false });
+      if (input.website) return sendJson(res, 201, { ok: true }); // honeypot
+      const { ok, errors, review } = validateReview(input);
+      if (!ok) return sendJson(res, 422, { ok: false, errors });
+      await db.reviews.add(review, { ip });
+      return sendJson(res, 201, { ok: true });
     }
 
     // Partial save of a multi-step form after each step (only with the visitor's consent; no contact details).
